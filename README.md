@@ -1,30 +1,45 @@
-[![Build Status](https://travis-ci.org/ajbdev/cronlingo.png)](https://travis-ci.org/ajbdev/cronlingo)
-# CRON Lingo
+# HuCron
 
-CronLingo turns human readable strings about time and turns them into valid crontabs. 
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/phpcom-lab/phpgit)](https://github.com/phpcom-lab/phpgit)
+[![Github Actions Status](https://github.com/phpcom-lab/phpgit/workflows/Unit-tests/badge.svg)](https://github.com/phpcom-lab/phpgit/actions)
+[![Php Version](https://img.shields.io/badge/php-%3E7.1.0-brightgreen.svg?maxAge=2592000)](https://packagist.org/packages/toolkit/sys-utils)
 
-Examples:
+`HuCron` turns human readable strings about time and turns them into valid crontabs. 
+
+> `phpcom-lab/hucron` is froked from the https://github.com/ajbdev/cronlingo
+
+## Install
+
+```bash
+composer install phpcom-lab/hucron
+```
+
+## Examples
 
 ```php
-echo CronLingo::fromExpression('Every day at midnight');
+use HuCron\HuCron;
+
+echo HuCron::fromExpression('Every day at midnight');
 // "0 0 * * *"
 
-echo CronLingo::fromExpression('Every 15 minutes at midnight on the weekend');
+echo HuCron::fromExpr('Every 15 minutes at midnight on the weekend');
 // "*/15 0 * * 0,6"
 
-echo CronLingo::fromExpression('Every other minute in August at noon on a weekday');
+echo HuCron::fromExpr('Every other minute in August at noon on a weekday');
 // "*/2 12 * 8 1,2,3,4,5"
 
-echo CronLingo::fromExpression('The 1st day in April at midnight');
+echo HuCron::fromExpr('The 1st day in April at midnight');
 // "0 0 1 4 *"
 
-echo CronLingo::fromExpression('Every day on the weekday at 2:25pm');
+echo HuCron::fromExpr('Every day on the weekday at 2:25pm');
 // "25 14 * * 1,2,3,4,5"
 ```
+
 ## Syntax
 
-CronLingo identifies the parts of a string with specific time-related keywords such as "on, to, at" and uses this to deduce the time meaning and convert it into part of a cron tab. It's not particular about the order of these statements.
+`HuCron` identifies the parts of a string with specific time-related keywords such as "on, to, at" and uses this to deduce the time meaning and convert it into part of a cron tab. It's not particular about the order of these statements.
 Here's a brief list of things that it will pick up and parse into a crontab:
+
 - Periods (daily, weekly, monthly)
 - Exact times (9:30 PM, 8a, 3p)
 - Meridiems (AM/PM/A/P)
@@ -36,12 +51,13 @@ Here's a brief list of things that it will pick up and parse into a crontab:
 - Month names (january, february, etc)
 - Weekend / weekday
 
-
 ## What's a cron tab?
+
 A cron tab is an expression that defines a recurring period of time.
 
 It looks something like this:
-```
+
+```text
 *    *    *    *    *
 -    -    -    -    -
 |    |    |    |    |

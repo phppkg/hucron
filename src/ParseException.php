@@ -7,13 +7,15 @@
  * @license  MIT
  */
 
-require 'vendor/autoload.php';
+namespace HuCron;
 
-use HuCron\Parser;
+use RuntimeException;
 
-$parser = new Parser();
-
-array_shift($argv);
-
-
-echo $parser->parse(implode(' ', $argv)) . PHP_EOL;
+/**
+ * Class ParseException
+ *
+ * @package HuCron
+ */
+class ParseException extends RuntimeException
+{
+}

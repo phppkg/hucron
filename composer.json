@@ -1,5 +1,5 @@
 {
-  "name": "ajbdev/cronlingo",
+  "name": "phpcom-lab/hucron",
   "description": "Express crontabs as human readable phrases",
   "minimum-stability": "stable",
   "license": "MIT",
@@ -11,7 +11,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "CronLingo\\": "src/CronLingo/"
+      "HuCron\\": "src/HuCron/"
     }
   },
   "require-dev": {

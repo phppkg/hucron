@@ -1,28 +1,35 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * This file is part of Kite.
+ *
+ * @link     https://github.com/inhere
+ * @author   https://github.com/inhere
+ * @license  MIT
+ */
 
 require_once 'vendor/autoload.php';
 
 class FieldTest extends \PHPUnit_Framework_TestCase
 {
-    public function testDefault()
+    public function testDefault(): void
     {
-        $field = new \CronLingo\Field();
+        $field = new \HuCron\Field();
 
         $this->assertEquals('*', (string) $field);
     }
 
-    public function testRepeat()
+    public function testRepeat(): void
     {
-        $field = new \CronLingo\Field();
+        $field = new \HuCron\Field();
 
         $field->repeatsOn(2);
 
         $this->assertEquals('*/2', (string) $field);
     }
 
-    public function testSpecific()
+    public function testSpecific(): void
     {
-        $field = new \CronLingo\Field();
+        $field = new \HuCron\Field();
 
         $field->addSpecific(5)
               ->addSpecific(6);
@@ -34,9 +41,9 @@ class FieldTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('1,2,3,4', (string) $field);
     }
 
-    public function testRepeatsWithSpecific()
+    public function testRepeatsWithSpecific(): void
     {
-        $field = new \CronLingo\Field();
+        $field = new \HuCron\Field();
 
         $field->repeatsOn(2)
               ->addSpecific(5);
@@ -44,12 +51,12 @@ class FieldTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('*/2,5', (string) $field);
     }
 
-    public function testRange()
+    public function testRange(): void
     {
-        $field = new \CronLingo\Field();
-        $field->setRange(0,15);
+        $field = new \HuCron\Field();
+        $field->setRange(0, 15);
 
-        $this->assertEquals('0-15', (string) $field );
+        $this->assertEquals('0-15', (string) $field);
 
         $field->setRangeMin(3);
         $field->setRangeMax(20);

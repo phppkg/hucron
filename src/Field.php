@@ -1,13 +1,20 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * This file is part of Kite.
+ *
+ * @link     https://github.com/inhere
+ * @author   https://github.com/inhere
+ * @license  MIT
+ */
 
-
-namespace CronLingo;
+namespace HuCron;
 
 /**
  * Represents a field within a CRON expression
  *
  * Class Field
- * @package CronLingo
+ *
+ * @package HuCron
  */
 class Field
 {
@@ -51,7 +58,8 @@ class Field
         }
 
         if (!is_null($this->rangeMin) && !is_null($this->rangeMax)
-            && $this->rangeMin >= 0 && $this->rangeMax >= 0) {
+            && $this->rangeMin >= 0 && $this->rangeMax >= 0
+        ) {
             $value = intval($this->rangeMin) . '-' . intval($this->rangeMax);
         }
 
@@ -65,9 +73,9 @@ class Field
     /**
      * @param $val
      */
-    public function fromCronValue($val)
+    public function fromCronValue($val): void
     {
-        $parts = explode(',',$val);
+        $parts = explode(',', $val);
 
         foreach ($parts as $part) {
             if (false !== strstr($part, '/')) {
@@ -76,10 +84,10 @@ class Field
                 if (isset($matches[1])) {
                     $this->repeatsOn(intval($matches[1]));
                 }
-            } else if (false !== strstr($part, '-')) {
+            } elseif (false !== strstr($part, '-')) {
                 $ranges = explode('-', $part);
                 $this->setRange(intval($ranges[0]), intval($ranges[1]));
-            } else if (is_numeric($part)) {
+            } elseif (is_numeric($part)) {
                 $this->addSpecific(intval($part));
             }
         }
@@ -97,6 +105,7 @@ class Field
     /**
      * @param $min
      * @param $max
+     *
      * @return $this
      */
     public function setRange($min, $max)
@@ -109,6 +118,7 @@ class Field
 
     /**
      * @param $rangeMin
+     *
      * @return $this
      */
     public function setRangeMin($rangeMin)
@@ -120,6 +130,7 @@ class Field
 
     /**
      * @param $rangeMax
+     *
      * @return $this
      */
     public function setRangeMax($rangeMax)
@@ -131,6 +142,7 @@ class Field
 
     /**
      * @param array $value
+     *
      * @return $this
      */
     public function setSpecific(array $value)
@@ -142,18 +154,20 @@ class Field
 
     /**
      * @param $value
+     *
      * @return $this
      */
     public function addSpecific($value)
     {
         $this->specific[] = $value;
-        $this->specific = array_unique($this->specific);
+        $this->specific   = array_unique($this->specific);
 
         return $this;
     }
 
     /**
      * @param $interval
+     *
      * @return $this
      */
     public function repeatsOn($interval)
@@ -194,5 +208,4 @@ class Field
     {
         return $this->rangeMax;
     }
-
 }

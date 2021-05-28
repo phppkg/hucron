@@ -10,14 +10,14 @@
          stopOnFailure="false"
          syntaxCheck="false">
     <testsuites>
-        <testsuite name="CronLingo Test Suite">
+        <testsuite name="HuCron Test Suite">
             <directory>./test/</directory>
         </testsuite>
     </testsuites>
 
     <filter>
         <whitelist>
-            <directory suffix=".php">./src/CronLingo/</directory>
+            <directory suffix=".php">./src/HuCron/</directory>
         </whitelist>
     </filter>
 

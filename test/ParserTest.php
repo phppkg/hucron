@@ -1,4 +1,11 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * This file is part of Kite.
+ *
+ * @link     https://github.com/inhere
+ * @author   https://github.com/inhere
+ * @license  MIT
+ */
 
 require_once 'vendor/autoload.php';
 
@@ -6,26 +13,26 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 {
     protected $parser;
 
-    protected function getParser() {
+    protected function getParser()
+    {
         if ($this->parser === null) {
-            $this->parser = new \CronLingo\Parser();
+            $this->parser = new \HuCron\Parser();
         }
         $this->parser->reset();
         return $this->parser;
     }
 
-    public function testParseException()
+    public function testParseException(): void
     {
-        $this->setExpectedException('CronLingo\ParseException');
+        $this->setExpectedException('HuCron\ParseException');
 
         $parser = $this->getParser();
-        $token = array('token' => 'T_EVERY');
+        $token = ['token' => 'T_EVERY'];
 
         $parser->expects($token, 'T_ONAT');
     }
 
-
-    public function testEvery()
+    public function testEvery(): void
     {
         $parser = $this->getParser();
 
@@ -35,7 +42,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testExactTime()
+    public function testExactTime(): void
     {
         $parser = $this->getParser();
 
@@ -55,7 +62,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testMeridiem()
+    public function testMeridiem(): void
     {
         $parser = $this->getParser();
 
@@ -71,7 +78,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testInterval()
+    public function testInterval(): void
     {
         $parser = $this->getParser();
 
@@ -86,7 +93,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testField()
+    public function testField(): void
     {
         $parser = $this->getParser();
 
@@ -101,7 +108,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testWeekday()
+    public function testWeekday(): void
     {
         $parser = $this->getParser();
 
@@ -111,7 +118,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testTimeOfDay()
+    public function testTimeOfDay(): void
     {
         $parser = $this->getParser();
 
@@ -126,7 +133,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testOnAt()
+    public function testOnAt(): void
     {
         $parser = $this->getParser();
 
@@ -141,7 +148,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testIn()
+    public function testIn(): void
     {
         $parser = $this->getParser();
 
@@ -151,7 +158,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testTo()
+    public function testTo(): void
     {
         $parser = $this->getParser();
 
@@ -161,7 +168,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testMonth()
+    public function testMonth(): void
     {
         $parser = $this->getParser();
 
@@ -171,7 +178,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testWeekdayWeekend()
+    public function testWeekdayWeekend(): void
     {
         $parser = $this->getParser();
 
@@ -186,7 +193,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testComprehensiveStrings()
+    public function testComprehensiveStrings(): void
     {
         $parser = $this->getParser();
 
@@ -210,6 +217,4 @@ class ParserTest extends \PHPUnit_Framework_TestCase
             $parser->parse('Every day on the weekday at 2:25pm')
         );
     }
-
-
 }

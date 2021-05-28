@@ -1,13 +1,20 @@
-<?php
+<?php declare(strict_types=1);
+/**
+ * This file is part of Kite.
+ *
+ * @link     https://github.com/inhere
+ * @author   https://github.com/inhere
+ * @license  MIT
+ */
 
-
-namespace CronLingo;
+namespace HuCron;
 
 /**
  * Represents a CRON expression
  *
  * Class Cron
- * @package CronLingo
+ *
+ * @package HuCron
  */
 class Cron
 {
@@ -15,18 +22,22 @@ class Cron
      * @var Field
      */
     public $dayOfWeek;
+
     /**
      * @var Field
      */
     public $month;
+
     /**
      * @var Field
      */
     public $dayOfMonth;
+
     /**
      * @var Field
      */
     public $hour;
+
     /**
      * @var Field
      */
@@ -39,10 +50,11 @@ class Cron
 
     public function __construct($string = null)
     {
-        $this->dayOfWeek = new Field();
-        $this->month = new Field();
+        $this->dayOfWeek  = new Field();
         $this->dayOfMonth = new Field();
-        $this->hour = new Field();
+
+        $this->month  = new Field();
+        $this->hour   = new Field();
         $this->minute = new Field();
 
         if ($string) {
@@ -55,7 +67,7 @@ class Cron
      *
      * @return array
      */
-    public function ordered()
+    public function ordered(): array
     {
         return [
             $this->minute,
@@ -69,11 +81,17 @@ class Cron
     /**
      * Create CRON object from a crontab string
      *
-     * @param $string
+     * @param string $string
      */
-    public function fromString($string)
+    public function fromString(string $string): void
     {
-        list($minute, $hour, $dayOfMonth, $month, $dayOfWeek) = preg_split('/\s+/', $string);
+        [
+            $minute,
+            $hour,
+            $dayOfMonth,
+            $month,
+            $dayOfWeek
+        ] = preg_split('/\s+/', $string);
 
         $this->minute->fromCronValue($minute);
         $this->hour->fromCronValue($hour);
@@ -93,10 +111,8 @@ class Cron
     /**
      * @param string $whitespace
      */
-    public function setWhitespace($whitespace)
+    public function setWhitespace($whitespace): void
     {
         $this->whitespace = $whitespace;
     }
-
-
 }
