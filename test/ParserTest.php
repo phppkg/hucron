@@ -8,16 +8,17 @@
  */
 
 use HuCron\ParseException;
+use HuCron\Parser;
 use PHPUnit\Framework\TestCase;
 
 class ParserTest extends TestCase
 {
     protected $parser;
 
-    protected function getParser(): \HuCron\Parser
+    protected function getParser(): Parser
     {
         if ($this->parser === null) {
-            $this->parser = new \HuCron\Parser();
+            $this->parser = new Parser();
         }
         $this->parser->reset();
         return $this->parser;
@@ -25,42 +26,31 @@ class ParserTest extends TestCase
 
     public function testParseException(): void
     {
-        $this->setExpectedException(ParseException::class);
+        $this->expectException(ParseException::class);
 
         $parser = $this->getParser();
-        $token = ['token' => 'T_EVERY'];
+        $token = ['token' => Parser::T_EVERY];
 
-        $parser->expects($token, 'T_ONAT');
+        $parser->expects($token, Parser::T_ONAT);
     }
 
     public function testEvery(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '0 0 * * *',
-            $parser->parse('Every day at midnight')
-        );
+        $statement = 'Every day at midnight';
+        $this->assertEquals('0 0 * * *', $parser->parse($statement));
     }
 
     public function testExactTime(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '20 3 * * *',
-            $parser->parse('Every day at 3:20')
-        );
+        $this->assertEquals('20 3 * * *', $parser->parse('Every day at 3:20'));
 
-        $this->assertEquals(
-            '0 13 * * *',
-            $parser->parse('Every day at 1p')
-        );
+        $this->assertEquals('0 13 * * *', $parser->parse('Every day at 1p'));
 
-        $this->assertEquals(
-            '0 14,15,5 * * *',
-            $parser->parse('Every day at 2p, 3pm, and 5am')
-        );
+        $this->assertEquals('0 14,15,5 * * *', $parser->parse('Every day at 2p, 3pm, and 5am'));
     }
 
     public function testMeridiem(): void

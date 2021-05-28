@@ -33,6 +33,16 @@ class HuCron
      *
      * @return string
      */
+    public static function fromStatement($string): string
+    {
+        return self::getParser()->parse($string);
+    }
+
+    /**
+     * @param $string
+     *
+     * @return string
+     */
     public static function fromExpression($string): string
     {
         return self::getParser()->parse($string);

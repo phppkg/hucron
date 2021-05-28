@@ -9,6 +9,13 @@
 
 namespace HuCron;
 
+use function array_values;
+use function preg_match;
+use function strtok;
+use function strtolower;
+use function trim;
+use function vdump;
+
 /**
  * Tokenizes a string and parses into a CRON expression
  *
@@ -18,32 +25,56 @@ namespace HuCron;
  */
 class Parser
 {
+    public const T_EVERY          = 'T_EVERY';
+    public const T_EXACTTIME      = 'T_EXACTTIME';
+    public const T_MERIDIEM       = 'T_MERIDIEM';
+    public const T_INTERVAL       = 'T_INTERVAL';
+    public const T_FIELD          = 'T_FIELD';
+    public const T_DAYOFWEEK      = 'T_DAYOFWEEK';
+    public const T_TIMEOFDAY      = 'T_TIMEOFDAY';
+    public const T_ONAT           = 'T_ONAT';
+    public const T_IN             = 'T_IN';
+    public const T_TO             = 'T_TO';
+    public const T_MONTH          = 'T_MONTH';
+    public const T_WEEKDAYWEEKEND = 'T_WEEKDAYWEEKEND';
+
     /**
      * Regular expressions used to tokenize a string
      *
      * @var array
      */
     protected $tokenMap = [
-        'every|daily|weekly|monthly'                                                              => 'T_EVERY',
-        '\d{1,2}:\d{2}(?:am|pm)?'                                                                 => 'T_EXACTTIME',
-        '\d{1,2}(?:am|pm|a|p)'                                                                    => 'T_EXACTTIME',
-        '(?:am|pm)'                                                                               => 'T_MERIDIEM',
-        '\d+[st|th|rd|nd]?[^:]?|other|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth' => 'T_INTERVAL',
-        'second|minute|hour|day|month?'                                                           => 'T_FIELD',
-        'sunday|monday|tuesday|wednesday|thursday|friday|saturday'                                => 'T_DAYOFWEEK',
-        'noon|midnight'                                                                           => 'T_TIMEOFDAY',
-        'on|at'                                                                                   => 'T_ONAT',
-        'in'                                                                                      => 'T_IN',
-        'to'                                                                                      => 'T_TO',
-        'january|february|march|april|may|june|july|august|september|october|november|december'   => 'T_MONTH',
-        'weekend|weekday?'                                                                        => 'T_WEEKDAYWEEKEND'
+        'every|daily|weekly|monthly'                                                              => self::T_EVERY,
+        '\d{1,2}:\d{2}(?:am|pm)?'                                                                 => self::T_EXACTTIME,
+        '\d{1,2}(?:am|pm|a|p)'                                                                    => self::T_EXACTTIME,
+        '(?:am|pm)'                                                                               => self::T_MERIDIEM,
+        '\d+[st|th|rd|nd]?[^:]?|other|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth' => self::T_INTERVAL,
+        'second|sec|secs|min|mins|minute|hour|day|days|month?'                                    => self::T_FIELD,
+        'sunday|sun|monday|mon|tuesday|wednesday|thursday|friday|fri|saturday'                        => self::T_DAYOFWEEK,
+        'noon|midnight'                                                                           => self::T_TIMEOFDAY,
+        'on|at'                                                                                   => self::T_ONAT,
+        'in'                                                                                      => self::T_IN,
+        'to'                                                                                      => self::T_TO,
+        'january|february|march|april|may|june|july|august|september|october|november|december'   => self::T_MONTH,
+        'weekend|weekday?'                                                                        => self::T_WEEKDAYWEEKEND,
     ];
 
     /**
+     * alias map
+     *
      * @var array
      */
     protected $fieldMap = [
-        'day' => 'dayOfMonth'
+        'day'     => 'dayOfMonth',
+        'days'    => 'dayOfMonth',
+        // alias for second
+        'sec'     => 'second',
+        'secs'    => 'second',
+        'seconds' => 'second',
+        // alias for minute
+        'min'     => 'minute',
+        'mins'    => 'minute',
+        'minutes' => 'minute',
     ];
 
     /**
@@ -51,11 +82,14 @@ class Parser
      */
     protected $dayOfWeekMap = [
         'sunday'    => 0,
+        'sun'       => 0, // short of sunday
         'monday'    => 1,
+        'mon'       => 1, // monday
         'tuesday'   => 2,
         'wednesday' => 3,
         'thursday'  => 4,
         'friday'    => 5,
+        'fri'       => 5, // friday
         'saturday'  => 6
     ];
 
@@ -110,6 +144,11 @@ class Parser
     ];
 
     /**
+     * @var string
+     */
+    private $rawExpr = '';
+
+    /**
      * @var int
      */
     protected $position;
@@ -129,13 +168,14 @@ class Parser
     /**
      * Parse a string into a CRON expression
      *
-     * @param $value
+     * @param string $value
      *
      * @return string
      */
-    public function parse($value): string
+    public function parse(string $value): string
     {
-        $this->tokens = $this->lex($value);
+        $this->rawExpr = $value;
+        $this->tokens  = $this->lex($value);
 
         $this->reset();
         $this->evaluate();
@@ -150,6 +190,7 @@ class Parser
     {
         $this->cron = new Cron();
 
+        $this->rawExpr  = '';
         $this->position = 0;
     }
 
@@ -169,6 +210,7 @@ class Parser
         if ($order > 1 && !$this->cron->hour->isDirty()) {
             $this->cron->hour->addSpecific(0);
         }
+
         if ($order > 0 && !$this->cron->minute->isDirty()) {
             $this->cron->minute->addSpecific(0);
         }
@@ -187,76 +229,78 @@ class Parser
         $value = $this->current()['value'];
 
         switch ($token) {
-            case 'T_EVERY':
+            case self::T_EVERY:
                 $this->expects($this->next(), ['T_INTERVAL', 'T_FIELD', 'T_DAYOFWEEK', 'T_ONAT', 'T_WEEKDAYWEEKEND']);
                 break;
-            case 'T_INTERVAL':
+            case self::T_INTERVAL:
                 $this->expects($this->next(), ['T_FIELD', 'T_TO']);
                 break;
-            case 'T_EXACTTIME':
+            case self::T_EXACTTIME:
                 $meridiem = '';
-
-                if ($this->is($this->next(), ['T_MERIDIEM'])) {
+                if ($this->is($this->next(), [self::T_MERIDIEM])) {
                     $meridiem = $this->next()['value'];
                 }
 
                 $hours = $minutes = 0;
-
+                // "1p" "1pm" "1:20"
                 $parts = explode(':', $value);
                 if (isset($parts[0])) {
                     $hours = $parts[0];
                 }
 
+                // eg "1:20"
                 if (isset($parts[1])) {
-                    $minutes = $parts[1];
+                    $minutes = (int)$parts[1];
                 }
 
-                if ($meridiem == 'pm' || strpos($value, 'pm') || strpos($value, 'p') !== false) {
+                // eg "1p" "1pm"
+                if ($meridiem === 'pm' || strpos($value, 'pm') || strpos($value, 'p') !== false) {
+                    $hours = (int)trim($hours, 'pm');
                     $hours += 12;
                 }
 
-                if ($this->is($this->previous(), 'T_ONAT')) {
+                if ($this->is($this->previous(), self::T_ONAT)) {
                     $this->cron->hour->setSpecific([(int)$hours]);
-                    $this->cron->minute->setSpecific([(int)$minutes]);
+                    $this->cron->minute->setSpecific([$minutes]);
                 } else {
                     $this->cron->hour->addSpecific((int)$hours);
-                    $this->cron->minute->addSpecific((int)$minutes);
+                    $this->cron->minute->addSpecific($minutes);
                 }
 
                 break;
-            case 'T_WEEKDAYWEEKEND':
-                $this->expects($this->previous(), ['T_ONAT', 'T_EVERY']);
+            case self::T_WEEKDAYWEEKEND:
+                $this->expects($this->previous(), [self::T_ONAT, self::T_EVERY]);
                 $this->cron->dayOfWeek->setSpecific($this->weekdayWeekendMap[$value]);
                 $this->nilTime($this->cron->dayOfWeek);
                 break;
-            case 'T_DAYOFWEEK':
+            case self::T_DAYOFWEEK:
                 $this->expects($this->previous(), ['T_ONAT', 'T_INTERVAL', 'T_EVERY', 'T_DAYOFWEEK']);
                 $this->cron->dayOfWeek->addSpecific($this->dayOfWeekMap[$value]);
 
                 $this->nilTime($this->cron->dayOfWeek);
                 break;
-            case 'T_TO':
+            case self::T_TO:
                 $this->expects($this->next(), 'T_INTERVAL');
                 $this->expects($this->previous(), 'T_INTERVAL');
                 break;
-            case 'T_TIMEOFDAY':
+            case self::T_TIMEOFDAY:
                 $this->expects($this->previous(), ['T_ONAT']);
 
                 $this->cron->hour->setSpecific([$this->timeOfDayMap[$value]]);
                 $this->nilTime($this->cron->hour);
                 break;
-            case 'T_MONTH':
+            case self::T_MONTH:
                 $this->expects($this->previous(), ['T_ONAT', 'T_IN']);
 
                 $this->cron->month->addSpecific($this->monthMap[$value]);
 
                 $this->nilTime($this->cron->month);
                 break;
-            case 'T_FIELD':
+            case self::T_FIELD:
                 $this->expects($this->previous(), ['T_INTERVAL', 'T_EVERY']);
 
                 if (isset($this->fieldMap[$value])) {
-                    if ($this->is($this->previous(), 'T_INTERVAL')) {
+                    if ($this->is($this->previous(), self::T_INTERVAL)) {
                         $value = $this->fieldMap[$value];
                     } else {
                         break;
@@ -274,7 +318,8 @@ class Parser
 
                     if ($this->is($this->previous(), 'T_EVERY')) {
                         $method = 'addSpecific';
-                        $amt    = '*';
+
+                        $amt = '*';
                     } else {
                         $method = $this->is($this->previous(2), 'T_EVERY') ? 'repeatsOn' : 'addSpecific';
 
@@ -285,22 +330,20 @@ class Parser
                 }
 
                 $this->nilTime($field);
-
                 break;
             default:
                 break;
         }
 
         $this->position++;
-
         $this->evaluate();
     }
 
     /**
      * Check if a token is of a type
      *
-     * @param $token
-     * @param $types
+     * @param array|bool   $token
+     * @param string|array $types
      *
      * @return bool
      */
@@ -350,9 +393,9 @@ class Parser
      *
      * @param int $skip
      *
-     * @return bool
+     * @return array|bool
      */
-    protected function next(int $skip = 1): bool
+    protected function next(int $skip = 1)
     {
         return $this->seek($this->position + $skip);
     }
@@ -362,9 +405,9 @@ class Parser
      *
      * @param int $skip
      *
-     * @return bool
+     * @return array|bool
      */
-    protected function previous(int $skip = 1): bool
+    protected function previous(int $skip = 1)
     {
         return $this->seek($this->position - $skip);
     }
@@ -374,9 +417,9 @@ class Parser
      *
      * @param $index
      *
-     * @return bool
+     * @return array|bool
      */
-    protected function seek($index): bool
+    protected function seek($index)
     {
         return $this->tokens[$index] ?? false;
     }
@@ -388,23 +431,22 @@ class Parser
      */
     protected function compileRegex(): string
     {
-        $regex = '~(' . implode(')|(', array_keys($this->tokenMap)) . ')~iA';
-        return $regex;
+        return '~(' . implode(')|(', array_keys($this->tokenMap)) . ')~iA';
     }
 
     /**
      * Lex a string into tokens
      *
-     * @param $string
+     * @param string $string
      *
      * @return array
      */
-    protected function lex($string): array
+    protected function lex(string $string): array
     {
         $delimiter = ' ';
         $fragment  = strtok($string, $delimiter);
-        $regex     = $this->compileRegex();
 
+        $regex  = $this->compileRegex();
         $tokens = [];
 
         while (false !== $fragment) {
@@ -424,5 +466,13 @@ class Parser
         }
 
         return $tokens;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRawExpr(): string
+    {
+        return $this->rawExpr;
     }
 }

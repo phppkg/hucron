@@ -13,9 +13,16 @@ use PHPUnit\Framework\TestCase;
 
 class HuCronTest extends TestCase
 {
-    public function testCron(): void
+    public function testFromStatement(): void
     {
-        $this->assertInternalType('string', HuCron::fromExpr('Every day at midnight'));
+        $cronString = HuCron::fromExpr('Every day at midnight');
+        $this->assertNotEmpty($cronString);
+
+        $cronExpr = HuCron::fromStatement('Every 5 min');
+        $this->assertEquals('*/5 * * * *', $cronExpr);
+
+        $cronExpr = HuCron::fromStatement('Every 5 mins');
+        $this->assertEquals('*/5 * * * *', $cronExpr);
     }
 
     public function testGetParser(): void

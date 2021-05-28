@@ -9,6 +9,12 @@
 
 namespace HuCron;
 
+use function explode;
+use function implode;
+use function is_null;
+use function preg_match;
+use function strpos;
+
 /**
  * Represents a field within a CRON expression
  *
@@ -51,7 +57,7 @@ class Field
         }
 
         if (count($this->specific) > 0) {
-            if (strlen($value) > 0) {
+            if ($value !== '') {
                 $value .= ',';
             }
             $value .= implode(',', $this->specific);
@@ -63,7 +69,7 @@ class Field
             $value = $this->rangeMin . '-' . $this->rangeMax;
         }
 
-        if (strlen($value) == 0) {
+        if ($value === '') {
             $value = '*';
         }
 

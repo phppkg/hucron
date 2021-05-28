@@ -9,6 +9,8 @@
 
 namespace HuCron;
 
+use function preg_split;
+
 /**
  * Represents a CRON expression
  *
@@ -48,7 +50,7 @@ class Cron
      */
     protected $whitespace = ' ';
 
-    public function __construct($string = null)
+    public function __construct(string $string = null)
     {
         $this->dayOfWeek  = new Field();
         $this->dayOfMonth = new Field();
@@ -95,9 +97,9 @@ class Cron
 
         $this->minute->fromCronValue($minute);
         $this->hour->fromCronValue($hour);
-        $this->dayOfMonth->fromCronValue($dayOfMonth);
         $this->month->fromCronValue($month);
         $this->dayOfWeek->fromCronValue($dayOfWeek);
+        $this->dayOfMonth->fromCronValue($dayOfMonth);
     }
 
     /**
