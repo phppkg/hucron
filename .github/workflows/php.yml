@@ -20,7 +20,10 @@ jobs:
         include:
           - os: 'ubuntu-latest'
             php: '7.2'
-            phpunit: '8.5.13'
+            phpunit: '8.5.15'
+          - os: 'ubuntu-latest'
+            php: '7.1'
+            phpunit: '7.5.20'
 
     steps:
       - name: Checkout
