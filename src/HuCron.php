@@ -2,8 +2,8 @@
 /**
  * This file is part of Kite.
  *
- * @link     https://github.com/inhere
  * @author   https://github.com/inhere
+ * @link     https://github.com/phpcom-lab/hucron
  * @license  MIT
  */
 
@@ -23,7 +23,7 @@ class HuCron
      *
      * @return string
      */
-    public static function fromExpr($string)
+    public static function fromExpr($string): string
     {
         return self::getParser()->parse($string);
     }
@@ -33,7 +33,7 @@ class HuCron
      *
      * @return string
      */
-    public static function fromExpression($string)
+    public static function fromExpression($string): string
     {
         return self::getParser()->parse($string);
     }
@@ -41,7 +41,7 @@ class HuCron
     /**
      * @return Parser
      */
-    public static function getParser()
+    public static function getParser(): Parser
     {
         return new Parser();
     }

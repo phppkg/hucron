@@ -2,8 +2,8 @@
 /**
  * This file is part of Kite.
  *
- * @link     https://github.com/inhere
  * @author   https://github.com/inhere
+ * @link     https://github.com/phpcom-lab/hucron
  * @license  MIT
  */
 
@@ -111,7 +111,7 @@ class Cron
     /**
      * @param string $whitespace
      */
-    public function setWhitespace($whitespace): void
+    public function setWhitespace(string $whitespace): void
     {
         $this->whitespace = $whitespace;
     }

@@ -2,16 +2,15 @@
 /**
  * This file is part of Kite.
  *
- * @link     https://github.com/inhere
  * @author   https://github.com/inhere
+ * @link     https://github.com/phpcom-lab/hucron
  * @license  MIT
  */
 
-require_once 'vendor/autoload.php';
-
 use HuCron\Cron;
+use PHPUnit\Framework\TestCase;
 
-class CronTest extends \PHPUnit_Framework_TestCase
+class CronTest extends TestCase
 {
     public function testFromString(): void
     {

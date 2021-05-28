@@ -2,8 +2,8 @@
 /**
  * This file is part of Kite.
  *
- * @link     https://github.com/inhere
  * @author   https://github.com/inhere
+ * @link     https://github.com/phpcom-lab/hucron
  * @license  MIT
  */
 
@@ -133,7 +133,7 @@ class Parser
      *
      * @return string
      */
-    public function parse($value)
+    public function parse($value): string
     {
         $this->tokens = $this->lex($value);
 
@@ -164,7 +164,7 @@ class Parser
      */
     protected function nilTime($field): void
     {
-        $order = array_search($field, $this->cron->ordered());
+        $order = array_search($field, $this->cron->ordered(), true);
 
         if ($order > 1 && !$this->cron->hour->isDirty()) {
             $this->cron->hour->addSpecific(0);
@@ -216,11 +216,11 @@ class Parser
                 }
 
                 if ($this->is($this->previous(), 'T_ONAT')) {
-                    $this->cron->hour->setSpecific([intval($hours)]);
-                    $this->cron->minute->setSpecific([intval($minutes)]);
+                    $this->cron->hour->setSpecific([(int)$hours]);
+                    $this->cron->minute->setSpecific([(int)$minutes]);
                 } else {
-                    $this->cron->hour->addSpecific(intval($hours));
-                    $this->cron->minute->addSpecific(intval($minutes));
+                    $this->cron->hour->addSpecific((int)$hours);
+                    $this->cron->minute->addSpecific((int)$minutes);
                 }
 
                 break;
@@ -278,7 +278,7 @@ class Parser
                     } else {
                         $method = $this->is($this->previous(2), 'T_EVERY') ? 'repeatsOn' : 'addSpecific';
 
-                        $amt = isset($this->intervalMap[$previous]) ? $this->intervalMap[$previous] : intval($previous);
+                        $amt = $this->intervalMap[$previous] ?? (int)$previous;
                     }
 
                     $field->{$method}($amt);
@@ -304,14 +304,14 @@ class Parser
      *
      * @return bool
      */
-    protected function is($token, $types)
+    protected function is($token, $types): bool
     {
         if (!is_array($types)) {
             $types = [$types];
         }
 
         if (false !== $token) {
-            return in_array($token['token'], $types);
+            return in_array($token['token'], $types, true);
         }
 
         return false;
@@ -330,7 +330,7 @@ class Parser
         }
 
         if (!$this->is($token, $types)) {
-            $t = isset($token['token']) ? $token['token'] : 'NULL';
+            $t = $token['token'] ?? 'NULL';
             throw new ParseException('Expected ' . implode(',', $types) . ' but got ' . $t);
         }
     }
@@ -340,7 +340,7 @@ class Parser
      *
      * @return array
      */
-    protected function current()
+    protected function current(): array
     {
         return $this->tokens[$this->position];
     }
@@ -352,7 +352,7 @@ class Parser
      *
      * @return bool
      */
-    protected function next($skip = 1)
+    protected function next(int $skip = 1): bool
     {
         return $this->seek($this->position + $skip);
     }
@@ -364,7 +364,7 @@ class Parser
      *
      * @return bool
      */
-    protected function previous($skip = 1)
+    protected function previous(int $skip = 1): bool
     {
         return $this->seek($this->position - $skip);
     }
@@ -376,13 +376,9 @@ class Parser
      *
      * @return bool
      */
-    protected function seek($index)
+    protected function seek($index): bool
     {
-        if (isset($this->tokens[$index])) {
-            return $this->tokens[$index];
-        }
-
-        return false;
+        return $this->tokens[$index] ?? false;
     }
 
     /**
@@ -390,7 +386,7 @@ class Parser
      *
      * @return string
      */
-    protected function compileRegex()
+    protected function compileRegex(): string
     {
         $regex = '~(' . implode(')|(', array_keys($this->tokenMap)) . ')~iA';
         return $regex;
@@ -403,7 +399,7 @@ class Parser
      *
      * @return array
      */
-    protected function lex($string)
+    protected function lex($string): array
     {
         $delimiter = ' ';
         $fragment  = strtok($string, $delimiter);

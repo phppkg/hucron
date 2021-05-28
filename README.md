@@ -1,7 +1,7 @@
 # HuCron
 
-[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/phpcom-lab/phpgit)](https://github.com/phpcom-lab/phpgit)
-[![Github Actions Status](https://github.com/phpcom-lab/phpgit/workflows/Unit-tests/badge.svg)](https://github.com/phpcom-lab/phpgit/actions)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/phpcom-lab/hucron)](https://github.com/phpcom-lab/hucron)
+[![Github Actions Status](https://github.com/phpcom-lab/hucron/workflows/Unit-tests/badge.svg)](https://github.com/phpcom-lab/hucron/actions)
 [![Php Version](https://img.shields.io/badge/php-%3E7.1.0-brightgreen.svg?maxAge=2592000)](https://packagist.org/packages/toolkit/sys-utils)
 
 `HuCron` turns human readable strings about time and turns them into valid crontabs. 

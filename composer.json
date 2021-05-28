@@ -7,17 +7,26 @@
     {
       "name": "Andy Baird",
       "email": "andybaird@gmail.com"
+    },
+    {
+      "name": "inhere",
+      "email": "in.798@qq.com"
     }
   ],
   "autoload": {
     "psr-4": {
-      "HuCron\\": "src/HuCron/"
+      "HuCron\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "HuCronTest\\": "test/"
     }
   },
   "require-dev": {
-    "phpunit/phpunit": "4.8.*"
+    "phpunit/phpunit": "^7.5 || ^8.5"
   },
   "requires": {
-    "php": "^5.4|^7.0"
+    "php": "^7.1"
   }
 }

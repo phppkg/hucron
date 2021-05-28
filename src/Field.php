@@ -2,8 +2,8 @@
 /**
  * This file is part of Kite.
  *
- * @link     https://github.com/inhere
  * @author   https://github.com/inhere
+ * @link     https://github.com/phpcom-lab/hucron
  * @license  MIT
  */
 
@@ -60,7 +60,7 @@ class Field
         if (!is_null($this->rangeMin) && !is_null($this->rangeMax)
             && $this->rangeMin >= 0 && $this->rangeMax >= 0
         ) {
-            $value = intval($this->rangeMin) . '-' . intval($this->rangeMax);
+            $value = $this->rangeMin . '-' . $this->rangeMax;
         }
 
         if (strlen($value) == 0) {
@@ -78,17 +78,17 @@ class Field
         $parts = explode(',', $val);
 
         foreach ($parts as $part) {
-            if (false !== strstr($part, '/')) {
+            if (strpos($part, '/') !== false) {
                 preg_match('/\*\/(\d+)/', $part, $matches);
 
                 if (isset($matches[1])) {
-                    $this->repeatsOn(intval($matches[1]));
+                    $this->repeatsOn((int)$matches[1]);
                 }
-            } elseif (false !== strstr($part, '-')) {
+            } elseif (strpos($part, '-') !== false) {
                 $ranges = explode('-', $part);
-                $this->setRange(intval($ranges[0]), intval($ranges[1]));
+                $this->setRange((int)$ranges[0], (int)$ranges[1]);
             } elseif (is_numeric($part)) {
-                $this->addSpecific(intval($part));
+                $this->addSpecific((int)$part);
             }
         }
     }
@@ -96,7 +96,7 @@ class Field
     /**
      * @return bool
      */
-    public function isDirty()
+    public function isDirty(): bool
     {
         return !is_null($this->repeats) || !is_null($this->rangeMin)
             || !is_null($this->rangeMax) || count($this->specific) > 0;
@@ -108,7 +108,7 @@ class Field
      *
      * @return $this
      */
-    public function setRange($min, $max)
+    public function setRange($min, $max): self
     {
         $this->rangeMin = $min;
         $this->rangeMax = $max;
@@ -121,7 +121,7 @@ class Field
      *
      * @return $this
      */
-    public function setRangeMin($rangeMin)
+    public function setRangeMin($rangeMin): self
     {
         $this->rangeMin = $rangeMin;
 
@@ -133,7 +133,7 @@ class Field
      *
      * @return $this
      */
-    public function setRangeMax($rangeMax)
+    public function setRangeMax($rangeMax): self
     {
         $this->rangeMax = $rangeMax;
 
@@ -145,7 +145,7 @@ class Field
      *
      * @return $this
      */
-    public function setSpecific(array $value)
+    public function setSpecific(array $value): self
     {
         $this->specific = $value;
 
@@ -157,7 +157,7 @@ class Field
      *
      * @return $this
      */
-    public function addSpecific($value)
+    public function addSpecific($value): self
     {
         $this->specific[] = $value;
         $this->specific   = array_unique($this->specific);
@@ -170,9 +170,9 @@ class Field
      *
      * @return $this
      */
-    public function repeatsOn($interval)
+    public function repeatsOn($interval): self
     {
-        $this->repeats = intval($interval);
+        $this->repeats = (int)$interval;
 
         return $this;
     }
@@ -180,7 +180,7 @@ class Field
     /**
      * @return int
      */
-    public function getRepeats()
+    public function getRepeats(): int
     {
         return $this->repeats;
     }
@@ -188,7 +188,7 @@ class Field
     /**
      * @return array
      */
-    public function getSpecific()
+    public function getSpecific(): array
     {
         return $this->specific;
     }
@@ -196,7 +196,7 @@ class Field
     /**
      * @return int
      */
-    public function getRangeMin()
+    public function getRangeMin(): int
     {
         return $this->rangeMin;
     }
@@ -204,7 +204,7 @@ class Field
     /**
      * @return int
      */
-    public function getRangeMax()
+    public function getRangeMax(): int
     {
         return $this->rangeMax;
     }

@@ -2,18 +2,19 @@
 /**
  * This file is part of Kite.
  *
- * @link     https://github.com/inhere
  * @author   https://github.com/inhere
+ * @link     https://github.com/phpcom-lab/hucron
  * @license  MIT
  */
 
-require_once 'vendor/autoload.php';
+use HuCron\ParseException;
+use PHPUnit\Framework\TestCase;
 
-class ParserTest extends \PHPUnit_Framework_TestCase
+class ParserTest extends TestCase
 {
     protected $parser;
 
-    protected function getParser()
+    protected function getParser(): \HuCron\Parser
     {
         if ($this->parser === null) {
             $this->parser = new \HuCron\Parser();
@@ -24,7 +25,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testParseException(): void
     {
-        $this->setExpectedException('HuCron\ParseException');
+        $this->setExpectedException(ParseException::class);
 
         $parser = $this->getParser();
         $token = ['token' => 'T_EVERY'];

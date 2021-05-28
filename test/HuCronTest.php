@@ -2,22 +2,24 @@
 /**
  * This file is part of Kite.
  *
- * @link     https://github.com/inhere
  * @author   https://github.com/inhere
+ * @link     https://github.com/phpcom-lab/hucron
  * @license  MIT
  */
 
-require_once 'vendor/autoload.php';
+use HuCron\HuCron;
+use HuCron\Parser;
+use PHPUnit\Framework\TestCase;
 
-class HuCronTest extends \PHPUnit_Framework_TestCase
+class HuCronTest extends TestCase
 {
     public function testCron(): void
     {
-        $this->assertInternalType('string', \HuCron\HuCron::fromExpression('Every day at midnight'));
+        $this->assertInternalType('string', HuCron::fromExpr('Every day at midnight'));
     }
 
     public function testGetParser(): void
     {
-        $this->assertInstanceOf('HuCron\Parser', \HuCron\HuCron::getParser());
+        $this->assertInstanceOf(Parser::class, HuCron::getParser());
     }
 }

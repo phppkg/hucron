@@ -2,14 +2,14 @@
 /**
  * This file is part of Kite.
  *
- * @link     https://github.com/inhere
  * @author   https://github.com/inhere
+ * @link     https://github.com/phpcom-lab/hucron
  * @license  MIT
  */
 
-require_once 'vendor/autoload.php';
+use PHPUnit\Framework\TestCase;
 
-class FieldTest extends \PHPUnit_Framework_TestCase
+class FieldTest extends TestCase
 {
     public function testDefault(): void
     {
