@@ -9,6 +9,7 @@
 
 namespace HuCron;
 
+use function array_search;
 use function array_values;
 use function implode;
 use function in_array;
@@ -39,6 +40,7 @@ class Parser
     public const T_TO             = 'T_TO';
     public const T_MONTH          = 'T_MONTH';
     public const T_WEEKDAYWEEKEND = 'T_WEEKDAYWEEKEND';
+    public const T_UNKNOWN        = 'T_UNKNOWN';
 
     public const EVERY_NEXT_TYPES = [self::T_INTERVAL, self::T_FIELD, self::T_DAYOFWEEK, self::T_ONAT, self::T_WEEKDAYWEEKEND];
 
@@ -57,7 +59,7 @@ class Parser
         '\d+[st|th|rd|nd]?[^:]?|other|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth' => self::T_INTERVAL,
         'second|sec|secs|min|mins|minute|hour|day|days|month?'                                    => self::T_FIELD,
         'sunday|sun|monday|mon|tuesday|wednesday|thursday|friday|fri|saturday'                    => self::T_DAYOFWEEK,
-        'noon|midnight'                                                                           => self::T_TIMEOFDAY,
+        'noon|midday|midnight'                                                                    => self::T_TIMEOFDAY,
         'on|at'                                                                                   => self::T_ONAT,
         'in'                                                                                      => self::T_IN,
         'to'                                                                                      => self::T_TO,
@@ -87,15 +89,15 @@ class Parser
      * @var array
      */
     protected $dayOfWeekMap = [
-        'sunday'    => 0,
         'sun'       => 0, // short of sunday
-        'monday'    => 1,
+        'sunday'    => 0,
         'mon'       => 1, // monday
+        'monday'    => 1,
         'tuesday'   => 2,
         'wednesday' => 3,
         'thursday'  => 4,
-        'friday'    => 5,
         'fri'       => 5, // friday
+        'friday'    => 5,
         'saturday'  => 6
     ];
 
@@ -138,6 +140,7 @@ class Parser
      */
     protected $timeOfDayMap = [
         'noon'     => 12,
+        'midday'   => 12,
         'midnight' => 0
     ];
 
@@ -201,28 +204,6 @@ class Parser
     }
 
     /**
-     * For simple expressions, zero out the time so the cron
-     * matches user expectation and does not execute constantly.
-     *
-     * E.g., someone would not expect "Every day on Tuesday"
-     * to run for every minute and hour on Tuesday.
-     *
-     * @param $field
-     */
-    protected function nilTime($field): void
-    {
-        $order = array_search($field, $this->cron->ordered(), true);
-
-        if ($order > 1 && !$this->cron->hour->isDirty()) {
-            $this->cron->hour->addSpecific(0);
-        }
-
-        if ($order > 0 && !$this->cron->minute->isDirty()) {
-            $this->cron->minute->addSpecific(0);
-        }
-    }
-
-    /**
      * Lex a string into tokens
      *
      * @param string $string
@@ -240,7 +221,8 @@ class Parser
         while (false !== $fragment) {
             if (preg_match($regex, $fragment, $matches)) {
                 foreach ($matches as $offset => $val) {
-                    if (!empty($val) && $offset > 0) {
+                    // fix: cannot use empty for assert '0'
+                    if ($val !== '' && $offset > 0) {
                         $token = array_values($this->tokenMap)[$offset - 1];
 
                         $tokens[] = [
@@ -373,7 +355,7 @@ class Parser
                     // Set Range
                     // $field->setRange($this->previous(3)['value'], $this->previous()['value']);
                     $field->setRange((int)$prev3['value'], (int)$prev['value']);
-                // } elseif ($this->is($this->previous(), [self::T_INTERVAL, self::T_EVERY])) {
+                    // } elseif ($this->is($this->previous(), [self::T_INTERVAL, self::T_EVERY])) {
                 } elseif ($this->is($prev, [self::T_INTERVAL, self::T_EVERY])) {
                     $method = 'addSpecific';
                     // $previous = $this->previous()['value'];
@@ -402,9 +384,31 @@ class Parser
     }
 
     /**
+     * For simple expressions, zero out the time so the cron
+     * matches user expectation and does not execute constantly.
+     *
+     * E.g., someone would not expect "Every day on Tuesday"
+     * to run for every minute and hour on Tuesday.
+     *
+     * @param $field
+     */
+    protected function nilTime($field): void
+    {
+        $order = array_search($field, $this->cron->ordered(), true);
+
+        if ($order > 1 && !$this->cron->hour->isDirty()) {
+            $this->cron->hour->addSpecific(0);
+        }
+
+        if ($order > 0 && !$this->cron->minute->isDirty()) {
+            $this->cron->minute->addSpecific(0);
+        }
+    }
+
+    /**
      * Check if a token is of a type
      *
-     * @param array   $token
+     * @param array        $token
      * @param string|array $types
      *
      * @return bool
@@ -440,7 +444,7 @@ class Parser
             $typStr = implode(',', $types);
 
             // $t = $token['token'] ?? 'NULL';
-            $t = $token['token'] ?? 'UNKNOWN';
+            $t = $token['token'] ?? self::T_UNKNOWN;
             throw new ParseException("Expected $typStr but got $t. (current: $curStr, expects: $tknStr)");
         }
     }
@@ -452,7 +456,7 @@ class Parser
      */
     protected function token2string(array $token): string
     {
-        $t = $token['token'] ?? 'UNKNOWN';
+        $t = $token['token'] ?? self::T_UNKNOWN;
         $v = $token['value'] ?? 'NULL';
 
         return "$t:'$v'";
