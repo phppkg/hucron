@@ -14,7 +14,9 @@
 composer install phpcom-lab/hucron
 ```
 
-## Examples
+## Example
+
+There are some examples for parse human statement.
 
 ```php
 use HuCron\HuCron;
@@ -22,7 +24,7 @@ use HuCron\HuCron;
 echo HuCron::fromExpression('Every day at midnight');
 // "0 0 * * *"
 
-echo HuCron::fromExpr('Every 15 minutes at midnight on the weekend');
+echo HuCron::fromStatement('Every 15 minutes at midnight on the weekend');
 // "*/15 0 * * 0,6"
 
 echo HuCron::fromExpr('Every other minute in August at noon on a weekday');
@@ -70,6 +72,14 @@ It looks something like this:
 
 From [Wikipedia](https://en.wikipedia.org/wiki/Cron):
 
-The software utility Cron is a time-based job scheduler in Unix-like computer operating systems. People who set up and maintain software environments use cron to schedule jobs (commands or shell scripts) to run periodically at fixed times, dates, or intervals. It typically automates system maintenance or administration—though its general-purpose nature makes it useful for things like connecting to the Internet and downloading email at regular intervals.
+The software utility Cron is a time-based job scheduler in Unix-like computer operating systems.
+People who set up and maintain software environments use cron to schedule jobs (commands or shell scripts) to run periodically at fixed times, dates, or intervals.
+It typically automates system maintenance or administration—though its general-purpose nature makes it useful for things like connecting to the Internet and downloading email at regular intervals.
 
+## Related
 
+- `dragonmantank/cron-expression` Calculate the next or previous run date and determine
+
+## LICENSE
+
+[MIT](LICENSE)

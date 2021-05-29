@@ -10,23 +10,24 @@
 namespace HuCron;
 
 use function array_values;
+use function implode;
+use function in_array;
+use function is_numeric;
 use function preg_match;
 use function strtok;
 use function strtolower;
 use function trim;
-use function vdump;
 
 /**
- * Tokenizes a string and parses into a CRON expression
- *
  * Class Parser
+ * - Tokenizes a string and parses into a CRON expression
  *
  * @package HuCron
  */
 class Parser
 {
     public const T_EVERY          = 'T_EVERY';
-    public const T_EXACTTIME      = 'T_EXACTTIME';
+    public const T_EXACTTIME      = 'T_EXACTTIME'; // exec action time.
     public const T_MERIDIEM       = 'T_MERIDIEM';
     public const T_INTERVAL       = 'T_INTERVAL';
     public const T_FIELD          = 'T_FIELD';
@@ -37,6 +38,10 @@ class Parser
     public const T_TO             = 'T_TO';
     public const T_MONTH          = 'T_MONTH';
     public const T_WEEKDAYWEEKEND = 'T_WEEKDAYWEEKEND';
+
+    public const EVERY_NEXT_TYPES = [self::T_INTERVAL, self::T_FIELD, self::T_DAYOFWEEK, self::T_ONAT, self::T_WEEKDAYWEEKEND];
+
+    public const DAYOFWEEK_PREV_TYPES = [self::T_ONAT, self::T_INTERVAL, self::T_EVERY, self::T_DAYOFWEEK];
 
     /**
      * Regular expressions used to tokenize a string
@@ -50,7 +55,7 @@ class Parser
         '(?:am|pm)'                                                                               => self::T_MERIDIEM,
         '\d+[st|th|rd|nd]?[^:]?|other|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth' => self::T_INTERVAL,
         'second|sec|secs|min|mins|minute|hour|day|days|month?'                                    => self::T_FIELD,
-        'sunday|sun|monday|mon|tuesday|wednesday|thursday|friday|fri|saturday'                        => self::T_DAYOFWEEK,
+        'sunday|sun|monday|mon|tuesday|wednesday|thursday|friday|fri|saturday'                    => self::T_DAYOFWEEK,
         'noon|midnight'                                                                           => self::T_TIMEOFDAY,
         'on|at'                                                                                   => self::T_ONAT,
         'in'                                                                                      => self::T_IN,
@@ -217,6 +222,55 @@ class Parser
     }
 
     /**
+     * Lex a string into tokens
+     *
+     * @param string $string
+     *
+     * @return array
+     */
+    protected function lex(string $string): array
+    {
+        $delimiter = ' ';
+        $fragment  = strtok(strtolower($string), $delimiter);
+
+        $regex  = $this->compileRegex();
+        $tokens = [];
+
+        while (false !== $fragment) {
+            if (preg_match($regex, $fragment, $matches)) {
+                foreach ($matches as $offset => $val) {
+                    if (!empty($val) && $offset > 0) {
+                        $token = array_values($this->tokenMap)[$offset - 1];
+
+                        $tokens[] = [
+                            'token' => $token,
+                            // 'value' => strtolower($matches[0])
+                            'value' => $matches[0]
+                        ];
+                    }
+                }
+            }
+
+            $fragment = strtok($delimiter);
+        }
+
+        foreach ($tokens as $idx => &$item) {
+            // $prevIdx = $idx - 1;
+            $nextIdx = $idx + 1;
+
+            // will auto fix: '10 am' to '10:00 am'
+            $nextVal = $tokens[$nextIdx]['value'] ?? '';
+            if (is_numeric($item['value']) && in_array($nextVal, ['am', 'pm'], true)) {
+                $item['token'] = self::T_EXACTTIME;
+                $item['value'] .= ':00';
+            }
+        }
+        // unset($item);
+
+        return $tokens;
+    }
+
+    /**
      * Evaluate tokens and build CRON expression
      */
     protected function evaluate(): void
@@ -230,10 +284,10 @@ class Parser
 
         switch ($token) {
             case self::T_EVERY:
-                $this->expects($this->next(), ['T_INTERVAL', 'T_FIELD', 'T_DAYOFWEEK', 'T_ONAT', 'T_WEEKDAYWEEKEND']);
+                $this->expects($this->next(), self::EVERY_NEXT_TYPES);
                 break;
             case self::T_INTERVAL:
-                $this->expects($this->next(), ['T_FIELD', 'T_TO']);
+                $this->expects($this->next(), [self::T_FIELD, self::T_TO]);
                 break;
             case self::T_EXACTTIME:
                 $meridiem = '';
@@ -274,30 +328,31 @@ class Parser
                 $this->nilTime($this->cron->dayOfWeek);
                 break;
             case self::T_DAYOFWEEK:
-                $this->expects($this->previous(), ['T_ONAT', 'T_INTERVAL', 'T_EVERY', 'T_DAYOFWEEK']);
+                // $this->expects($this->previous(), ['T_ONAT', 'T_INTERVAL', 'T_EVERY', 'T_DAYOFWEEK']);
+                $this->expects($this->previous(), self::DAYOFWEEK_PREV_TYPES);
                 $this->cron->dayOfWeek->addSpecific($this->dayOfWeekMap[$value]);
 
                 $this->nilTime($this->cron->dayOfWeek);
                 break;
             case self::T_TO:
-                $this->expects($this->next(), 'T_INTERVAL');
-                $this->expects($this->previous(), 'T_INTERVAL');
+                $this->expects($this->next(), self::T_INTERVAL);
+                $this->expects($this->previous(), self::T_INTERVAL);
                 break;
             case self::T_TIMEOFDAY:
-                $this->expects($this->previous(), ['T_ONAT']);
+                $this->expects($this->previous(), [self::T_ONAT]);
 
                 $this->cron->hour->setSpecific([$this->timeOfDayMap[$value]]);
                 $this->nilTime($this->cron->hour);
                 break;
             case self::T_MONTH:
-                $this->expects($this->previous(), ['T_ONAT', 'T_IN']);
+                $this->expects($this->previous(), [self::T_ONAT, self::T_IN]);
 
                 $this->cron->month->addSpecific($this->monthMap[$value]);
 
                 $this->nilTime($this->cron->month);
                 break;
             case self::T_FIELD:
-                $this->expects($this->previous(), ['T_INTERVAL', 'T_EVERY']);
+                $this->expects($prev = $this->previous(), [self::T_INTERVAL, self::T_EVERY]);
 
                 if (isset($this->fieldMap[$value])) {
                     if ($this->is($this->previous(), self::T_INTERVAL)) {
@@ -309,19 +364,20 @@ class Parser
 
                 $field = $this->cron->{$value};
 
-                if ($this->is($this->previous(2), 'T_TO')) {
-                    $this->expects($this->previous(3), ['T_INTERVAL']);
-                    // Range
-                    $field->setRange($this->previous(3)['value'], $this->previous()['value']);
-                } elseif ($this->is($this->previous(), ['T_INTERVAL', 'T_EVERY'])) {
+                if ($this->is($this->previous(2), self::T_TO)) {
+                    $this->expects($prev3 = $this->previous(3), [self::T_INTERVAL]);
+
+                    // Set Range
+                    // $field->setRange($this->previous(3)['value'], $this->previous()['value']);
+                    $field->setRange((int)$prev3['value'], (int)$prev['value']);
+                } elseif ($this->is($this->previous(), [self::T_INTERVAL, self::T_EVERY])) {
+                    $method = 'addSpecific';
                     $previous = $this->previous()['value'];
 
-                    if ($this->is($this->previous(), 'T_EVERY')) {
-                        $method = 'addSpecific';
-
+                    if ($this->is($this->previous(), self::T_EVERY)) {
                         $amt = '*';
                     } else {
-                        $method = $this->is($this->previous(2), 'T_EVERY') ? 'repeatsOn' : 'addSpecific';
+                        $method = $this->is($this->previous(2), self::T_EVERY) ? 'repeatsOn' : 'addSpecific';
 
                         $amt = $this->intervalMap[$previous] ?? (int)$previous;
                     }
@@ -342,18 +398,18 @@ class Parser
     /**
      * Check if a token is of a type
      *
-     * @param array|bool   $token
+     * @param array   $token
      * @param string|array $types
      *
      * @return bool
      */
-    protected function is($token, $types): bool
+    protected function is(array $token, $types): bool
     {
         if (!is_array($types)) {
             $types = [$types];
         }
 
-        if (false !== $token) {
+        if ($token) {
             return in_array($token['token'], $types, true);
         }
 
@@ -363,8 +419,8 @@ class Parser
     /**
      * Enforce expectations of a certain token
      *
-     * @param $token
-     * @param $types
+     * @param array|bool   $token
+     * @param array|string $types
      */
     public function expects($token, $types): void
     {
@@ -373,9 +429,27 @@ class Parser
         }
 
         if (!$this->is($token, $types)) {
-            $t = $token['token'] ?? 'NULL';
-            throw new ParseException('Expected ' . implode(',', $types) . ' but got ' . $t);
+            $tknStr = $this->token2string($token);
+            $curStr = $this->token2string($this->current());
+            $typStr = implode(',', $types);
+
+            // $t = $token['token'] ?? 'NULL';
+            $t = $token['token'] ?? 'UNKNOWN';
+            throw new ParseException("Expected $typStr but got $t. (current: $curStr, expects: $tknStr)");
         }
+    }
+
+    /**
+     * @param array $token
+     *
+     * @return string
+     */
+    protected function token2string(array $token): string
+    {
+        $t = $token['token'] ?? 'UNKNOWN';
+        $v = $token['value'] ?? 'NULL';
+
+        return "$t:'$v'";
     }
 
     /**
@@ -385,7 +459,7 @@ class Parser
      */
     protected function current(): array
     {
-        return $this->tokens[$this->position];
+        return $this->tokens[$this->position] ?? [];
     }
 
     /**
@@ -393,9 +467,9 @@ class Parser
      *
      * @param int $skip
      *
-     * @return array|bool
+     * @return array
      */
-    protected function next(int $skip = 1)
+    protected function next(int $skip = 1): array
     {
         return $this->seek($this->position + $skip);
     }
@@ -405,9 +479,9 @@ class Parser
      *
      * @param int $skip
      *
-     * @return array|bool
+     * @return array
      */
-    protected function previous(int $skip = 1)
+    protected function previous(int $skip = 1): array
     {
         return $this->seek($this->position - $skip);
     }
@@ -415,13 +489,13 @@ class Parser
     /**
      * Seek a specific token
      *
-     * @param $index
+     * @param int $index
      *
-     * @return array|bool
+     * @return array
      */
-    protected function seek($index)
+    protected function seek(int $index): array
     {
-        return $this->tokens[$index] ?? false;
+        return $this->tokens[$index] ?? [];
     }
 
     /**
@@ -432,40 +506,6 @@ class Parser
     protected function compileRegex(): string
     {
         return '~(' . implode(')|(', array_keys($this->tokenMap)) . ')~iA';
-    }
-
-    /**
-     * Lex a string into tokens
-     *
-     * @param string $string
-     *
-     * @return array
-     */
-    protected function lex(string $string): array
-    {
-        $delimiter = ' ';
-        $fragment  = strtok($string, $delimiter);
-
-        $regex  = $this->compileRegex();
-        $tokens = [];
-
-        while (false !== $fragment) {
-            if (preg_match($regex, $fragment, $matches)) {
-                foreach ($matches as $offset => $val) {
-                    if (!empty($val) && $offset > 0) {
-                        $token = array_values($this->tokenMap)[$offset - 1];
-
-                        $tokens[] = [
-                            'token' => $token,
-                            'value' => strtolower($matches[0])
-                        ];
-                    }
-                }
-            }
-            $fragment = strtok($delimiter);
-        }
-
-        return $tokens;
     }
 
     /**

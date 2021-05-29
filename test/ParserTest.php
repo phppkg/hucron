@@ -12,6 +12,9 @@ use HuCron\ParseException;
 use HuCron\Parser;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Class ParserTest
+ */
 class ParserTest extends TestCase
 {
     protected $parser;
@@ -21,6 +24,7 @@ class ParserTest extends TestCase
         if ($this->parser === null) {
             $this->parser = new Parser();
         }
+
         $this->parser->reset();
         return $this->parser;
     }
@@ -58,131 +62,81 @@ class ParserTest extends TestCase
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '0 15 * * *',
-            $parser->parse('Every day at 3:00 PM')
-        );
-
-
-        $this->assertEquals(
-            '0 10 * * *',
-            $parser->parse('Every day at 10:00 AM')
-        );
+        $this->assertEquals('0 15 * * *', $parser->parse('Every day at 3:00 PM'));
+        $this->assertEquals('0 10 * * *', $parser->parse('Every day at 10:00 AM'));
     }
 
     public function testInterval(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '*/2 * * * *',
-            $parser->parse('Every other minute')
-        );
+        $this->assertEquals('*/2 * * * *', $parser->parse('Every other minute'));
 
-        $this->assertEquals(
-            '0 */3 * * *',
-            $parser->parse('Every 3 hours')
-        );
+        $this->assertEquals('0 */3 * * *', $parser->parse('Every 3 hours'));
     }
 
     public function testField(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '0 0 * */3 *',
-            $parser->parse('Every 3rd month')
-        );
+        $this->assertEquals('0 0 * */3 *', $parser->parse('Every 3rd month'));
 
-        $this->assertEquals(
-            '0 3-6 * * *',
-            $parser->parse('Every 3 to 6 hours')
-        );
+        $this->assertEquals('0 3-6 * * *', $parser->parse('Every 3 to 6 hours'));
     }
 
     public function testWeekday(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '0 0 * * 2',
-            $parser->parse('Every tuesday')
-        );
+        $this->assertEquals('0 0 * * 2', $parser->parse('Every tuesday'));
     }
 
     public function testTimeOfDay(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '0 12 * * *',
-            $parser->parse('Every day at noon')
-        );
+        $this->assertEquals('0 12 * * *', $parser->parse('Every day at noon'));
 
-        $this->assertEquals(
-            '0 0 * * *',
-            $parser->parse('Every day at midnight')
-        );
+        $this->assertEquals('0 0 * * *', $parser->parse('Every day at midnight'));
     }
 
     public function testOnAt(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '0 0 * * 0,6',
-            $parser->parse('Every day on the weekend')
-        );
+        $this->assertEquals('0 0 * * 0,6', $parser->parse('Every day on the weekend'));
 
-        $this->assertEquals(
-            '0 0 * * 1,2,3,4,5',
-            $parser->parse('Every day on a weekday')
-        );
+        $this->assertEquals('0 0 * * 1,2,3,4,5', $parser->parse('Every day on a weekday'));
     }
 
     public function testIn(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '0 0 * 2 *',
-            $parser->parse('Every day in February')
-        );
+        $this->assertEquals('0 0 * 2 *', $parser->parse('Every day in February'));
     }
 
     public function testTo(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '5-12 * * * *',
-            $parser->parse('Every 5 to 12 minutes')
-        );
+        $this->assertEquals('5-12 * * * *', $parser->parse('Every 5 to 12 minutes'));
     }
 
     public function testMonth(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '0 * * 1 *',
-            $parser->parse('Every hour in January')
-        );
+        $this->assertEquals('0 * * 1 *', $parser->parse('Every hour in January'));
     }
 
     public function testWeekdayWeekend(): void
     {
         $parser = $this->getParser();
 
-        $this->assertEquals(
-            '0 0 * * 0,6',
-            $parser->parse('Every day on the weekend')
-        );
+        $this->assertEquals('0 0 * * 0,6', $parser->parse('Every day on the weekend'));
 
-        $this->assertEquals(
-            '0 0 * * 1,2,3,4,5',
-            $parser->parse('Every weekday')
-        );
+        $this->assertEquals('0 0 * * 1,2,3,4,5', $parser->parse('Every weekday'));
     }
 
     public function testComprehensiveStrings(): void
@@ -199,14 +153,24 @@ class ParserTest extends TestCase
             $parser->parse('Every other minute in August at noon on the weekday')
         );
 
-        $this->assertEquals(
-            '0 0 1 4 *',
-            $parser->parse('The 1st day in April at midnight')
-        );
+        $this->assertEquals('0 0 1 4 *', $parser->parse('The 1st day in April at midnight'));
 
-        $this->assertEquals(
-            '25 14 * * 1,2,3,4,5',
-            $parser->parse('Every day on the weekday at 2:25pm')
-        );
+        $this->assertEquals('25 14 * * 1,2,3,4,5', $parser->parse('Every day on the weekday at 2:25pm'));
+    }
+
+    public function testParseMore(): void
+    {
+        $parser = $this->getParser();
+        $tests = [
+            ['*/5 * * * *', 'every 5 min'],
+            ['0 10 * * *', 'every day 10am'],
+            ['0 10 * * *', 'Every day 10 am'],
+            ['0 10 * * *', 'Every day 10:00 am'],
+            ['20 10 * * *', 'every day 10:20 am'],
+        ];
+
+        foreach ($tests as [$want, $str]) {
+            $this->assertEquals($want, $parser->parse($str));
+        }
     }
 }

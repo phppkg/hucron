@@ -63,6 +63,7 @@ class Field
             $value .= implode(',', $this->specific);
         }
 
+        // TODO use if (isset($this->rangeMin, $this->rangeMax)
         if (!is_null($this->rangeMin) && !is_null($this->rangeMax)
             && $this->rangeMin >= 0 && $this->rangeMax >= 0
         ) {
@@ -109,12 +110,12 @@ class Field
     }
 
     /**
-     * @param $min
-     * @param $max
+     * @param int $min
+     * @param int $max
      *
      * @return $this
      */
-    public function setRange($min, $max): self
+    public function setRange(int $min, int $max): self
     {
         $this->rangeMin = $min;
         $this->rangeMax = $max;
@@ -123,11 +124,11 @@ class Field
     }
 
     /**
-     * @param $rangeMin
+     * @param int $rangeMin
      *
      * @return $this
      */
-    public function setRangeMin($rangeMin): self
+    public function setRangeMin(int $rangeMin): self
     {
         $this->rangeMin = $rangeMin;
 
@@ -135,11 +136,11 @@ class Field
     }
 
     /**
-     * @param $rangeMax
+     * @param int $rangeMax
      *
      * @return $this
      */
-    public function setRangeMax($rangeMax): self
+    public function setRangeMax(int $rangeMax): self
     {
         $this->rangeMax = $rangeMax;
 
@@ -172,13 +173,13 @@ class Field
     }
 
     /**
-     * @param $interval
+     * @param int $interval
      *
      * @return $this
      */
-    public function repeatsOn($interval): self
+    public function repeatsOn(int $interval): self
     {
-        $this->repeats = (int)$interval;
+        $this->repeats = $interval;
 
         return $this;
     }

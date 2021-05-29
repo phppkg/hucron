@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php /** @noinspection PhpUndefinedMethodInspection */
+declare(strict_types=1);
 /**
  * This file is part of Kite.
  *
@@ -7,20 +8,21 @@
  * @license  MIT
  */
 
+use HuCron\Field;
 use PHPUnit\Framework\TestCase;
 
 class FieldTest extends TestCase
 {
     public function testDefault(): void
     {
-        $field = new \HuCron\Field();
+        $field = new Field();
 
         $this->assertEquals('*', (string) $field);
     }
 
     public function testRepeat(): void
     {
-        $field = new \HuCron\Field();
+        $field = new Field();
 
         $field->repeatsOn(2);
 
@@ -29,7 +31,7 @@ class FieldTest extends TestCase
 
     public function testSpecific(): void
     {
-        $field = new \HuCron\Field();
+        $field = new Field();
 
         $field->addSpecific(5)
               ->addSpecific(6);
@@ -43,7 +45,7 @@ class FieldTest extends TestCase
 
     public function testRepeatsWithSpecific(): void
     {
-        $field = new \HuCron\Field();
+        $field = new Field();
 
         $field->repeatsOn(2)
               ->addSpecific(5);
@@ -53,7 +55,7 @@ class FieldTest extends TestCase
 
     public function testRange(): void
     {
-        $field = new \HuCron\Field();
+        $field = new Field();
         $field->setRange(0, 15);
 
         $this->assertEquals('0-15', (string) $field);

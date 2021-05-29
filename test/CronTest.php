@@ -55,7 +55,6 @@ class CronTest extends TestCase
     public function testSetWhitespace(): void
     {
         $cron = new Cron();
-
         $cron->setWhitespace('    ');
 
         $this->assertEquals(
