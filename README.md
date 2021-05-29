@@ -2,7 +2,7 @@
 
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/phpcom-lab/hucron)](https://github.com/phpcom-lab/hucron)
 [![Github Actions Status](https://github.com/phpcom-lab/hucron/workflows/Unit-tests/badge.svg)](https://github.com/phpcom-lab/hucron/actions)
-[![Php Version](https://img.shields.io/badge/php-%3E7.1.0-brightgreen.svg?maxAge=2592000)](https://packagist.org/packages/toolkit/sys-utils)
+[![Php Version](https://img.shields.io/badge/php-%3E7.2.0-brightgreen.svg?maxAge=2592000)](https://packagist.org/packages/toolkit/sys-utils)
 
 `HuCron` turns human readable strings about time and turns them into valid crontabs. 
 
@@ -39,18 +39,19 @@ echo HuCron::fromExpr('Every day on the weekday at 2:25pm');
 
 ## Syntax
 
-`HuCron` identifies the parts of a string with specific time-related keywords such as "on, to, at" and uses this to deduce the time meaning and convert it into part of a cron tab. It's not particular about the order of these statements.
+`HuCron` identifies the parts of a string with specific time-related keywords such as "on, to, at" and uses this to deduce the time meaning and convert it into part of a cron tab.
+It's not particular about the order of these statements.
 Here's a brief list of things that it will pick up and parse into a crontab:
 
-- Periods (daily, weekly, monthly)
-- Exact times (9:30 PM, 8a, 3p)
-- Meridiems (AM/PM/A/P)
-- Intervals (1st, second, other, ninth, etc)
-- Specific fields (second, minute, hour, day, month)
-- Day of week (sunday, monday, etc)
-- 12 o'clocks (noon, midnight)
-- Lists (e.g., 5 to 12 minutes)
-- Month names (january, february, etc)
+- Periods (`daily, weekly, monthly`)
+- Exact times (`9:30 PM, 8a, 3p`)
+- Meridiems (`AM/PM/A/P`)
+- Intervals (`1st, second, other, ninth, etc`)
+- Specific fields (`second, minute, hour, day, month`)
+- Day of week (`sunday, monday` etc)
+- 12 o'clocks (`noon, midnight`)
+- Lists (e.g. `5 to 12 minutes`)
+- Month names (`january, february`, etc)
 - Weekend / weekday
 
 ## What's a cron tab?

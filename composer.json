@@ -13,6 +13,9 @@
       "email": "in.798@qq.com"
     }
   ],
+  "requires": {
+    "php": "^7.2"
+  },
   "autoload": {
     "psr-4": {
       "HuCron\\": "src/"
@@ -25,8 +28,5 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^7.5 || ^8.5"
-  },
-  "requires": {
-    "php": "^7.1"
   }
 }
