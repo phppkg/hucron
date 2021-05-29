@@ -46,6 +46,16 @@ class Parser
 
     public const DAYOFWEEK_PREV_TYPES = [self::T_ONAT, self::T_INTERVAL, self::T_EVERY, self::T_DAYOFWEEK];
 
+    // Shortcut statement
+    public const SHORTCUTS = [
+        '@yearly'   => '0 0 1 1 *',
+        '@annually' => '0 0 1 1 *',
+        '@monthly'  => '0 0 1 * *',
+        '@weekly'   => '0 0 * * 0',
+        '@daily'    => '0 0 * * *',
+        '@hourly'   => '0 * * * *',
+    ];
+
     /**
      * Regular expressions used to tokenize a string
      *
@@ -183,10 +193,11 @@ class Parser
      */
     public function parse(string $value): string
     {
+        $this->reset();
+
         $this->rawExpr = $value;
         $this->tokens  = $this->lex($value);
 
-        $this->reset();
         $this->evaluate();
 
         return (string)$this->cron;
@@ -213,11 +224,18 @@ class Parser
     protected function lex(string $string): array
     {
         $delimiter = ' ';
-        $fragment  = strtok(strtolower($string), $delimiter);
+        $fmtString = strtolower(trim($string));
+
+        // support quick parse shortcuts statement
+        if (isset(self::SHORTCUTS[$fmtString])) {
+            $this->cron = Cron::new(self::SHORTCUTS[$fmtString]);
+            return [];
+        }
 
         $regex  = $this->compileRegex();
         $tokens = [];
 
+        $fragment  = strtok($fmtString, $delimiter);
         while (false !== $fragment) {
             if (preg_match($regex, $fragment, $matches)) {
                 foreach ($matches as $offset => $val) {
@@ -227,8 +245,8 @@ class Parser
 
                         $tokens[] = [
                             'token' => $token,
-                            // 'value' => strtolower($matches[0])
                             'value' => $matches[0]
+                            // 'value' => strtolower($matches[0])
                         ];
                     }
                 }
