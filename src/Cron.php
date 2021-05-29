@@ -9,7 +9,11 @@
 
 namespace HuCron;
 
+use InvalidArgumentException;
+use function count;
+use function implode;
 use function preg_split;
+use function trim;
 
 /**
  * Represents a CRON expression
@@ -20,6 +24,16 @@ use function preg_split;
  */
 class Cron
 {
+    /**
+     * @var string
+     */
+    private $rawExpr = '';
+
+    /**
+     * @var string
+     */
+    private $cronExpr;
+
     /**
      * @var Field
      */
@@ -50,7 +64,22 @@ class Cron
      */
     protected $whitespace = ' ';
 
-    public function __construct(string $string = null)
+    /**
+     * @param string $string
+     *
+     * @return static
+     */
+    public static function new(string $string = ''): self
+    {
+        return new self($string);
+    }
+
+    /**
+     * Class constructor.
+     *
+     * @param string $string
+     */
+    public function __construct(string $string = '')
     {
         $this->dayOfWeek  = new Field();
         $this->dayOfMonth = new Field();
@@ -87,13 +116,15 @@ class Cron
      */
     public function fromString(string $string): void
     {
-        [
-            $minute,
-            $hour,
-            $dayOfMonth,
-            $month,
-            $dayOfWeek
-        ] = preg_split('/\s+/', $string);
+        $parts = preg_split('/\s+/', trim($string));
+        if (count($parts) < 5) {
+            throw new InvalidArgumentException("invalid cron expr string: $string");
+        }
+
+        $this->rawExpr = $string;
+
+        // assign to vars
+        [$minute, $hour, $dayOfMonth, $month, $dayOfWeek] = $parts;
 
         $this->minute->fromCronValue($minute);
         $this->hour->fromCronValue($hour);
@@ -107,7 +138,7 @@ class Cron
      */
     public function __toString()
     {
-        return trim(implode($this->whitespace, $this->ordered()));
+        return $this->getCronExpr();
     }
 
     /**
@@ -116,5 +147,25 @@ class Cron
     public function setWhitespace(string $whitespace): void
     {
         $this->whitespace = $whitespace;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCronExpr(): string
+    {
+        if (!$this->cronExpr) {
+            $this->cronExpr = implode($this->whitespace, $this->ordered());
+        }
+
+        return $this->cronExpr;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRawExpr(): string
+    {
+        return $this->rawExpr;
     }
 }

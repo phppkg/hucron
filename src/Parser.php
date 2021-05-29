@@ -12,6 +12,7 @@ namespace HuCron;
 use function array_values;
 use function implode;
 use function in_array;
+use function is_array;
 use function is_numeric;
 use function preg_match;
 use function strtok;
@@ -291,8 +292,9 @@ class Parser
                 break;
             case self::T_EXACTTIME:
                 $meridiem = '';
-                if ($this->is($this->next(), [self::T_MERIDIEM])) {
-                    $meridiem = $this->next()['value'];
+                if ($this->is($next = $this->next(), [self::T_MERIDIEM])) {
+                    // $meridiem = $this->next()['value'];
+                    $meridiem = $next['value'];
                 }
 
                 $hours = $minutes = 0;
@@ -355,7 +357,8 @@ class Parser
                 $this->expects($prev = $this->previous(), [self::T_INTERVAL, self::T_EVERY]);
 
                 if (isset($this->fieldMap[$value])) {
-                    if ($this->is($this->previous(), self::T_INTERVAL)) {
+                    // if ($this->is($this->previous(), self::T_INTERVAL)) {
+                    if ($this->is($prev, self::T_INTERVAL)) {
                         $value = $this->fieldMap[$value];
                     } else {
                         break;
@@ -370,11 +373,14 @@ class Parser
                     // Set Range
                     // $field->setRange($this->previous(3)['value'], $this->previous()['value']);
                     $field->setRange((int)$prev3['value'], (int)$prev['value']);
-                } elseif ($this->is($this->previous(), [self::T_INTERVAL, self::T_EVERY])) {
+                // } elseif ($this->is($this->previous(), [self::T_INTERVAL, self::T_EVERY])) {
+                } elseif ($this->is($prev, [self::T_INTERVAL, self::T_EVERY])) {
                     $method = 'addSpecific';
-                    $previous = $this->previous()['value'];
+                    // $previous = $this->previous()['value'];
+                    $previous = $prev['value'];
 
-                    if ($this->is($this->previous(), self::T_EVERY)) {
+                    // if ($this->is($this->previous(), self::T_EVERY)) {
+                    if ($this->is($prev, self::T_EVERY)) {
                         $amt = '*';
                     } else {
                         $method = $this->is($this->previous(2), self::T_EVERY) ? 'repeatsOn' : 'addSpecific';
@@ -405,11 +411,11 @@ class Parser
      */
     protected function is(array $token, $types): bool
     {
-        if (!is_array($types)) {
-            $types = [$types];
-        }
-
         if ($token) {
+            if (!is_array($types)) {
+                return $token['token'] === $types;
+            }
+
             return in_array($token['token'], $types, true);
         }
 

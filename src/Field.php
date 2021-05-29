@@ -14,6 +14,7 @@ use function implode;
 use function is_null;
 use function preg_match;
 use function strpos;
+use function vdump;
 
 /**
  * Represents a field within a CRON expression
@@ -30,7 +31,7 @@ class Field
     protected $repeats;
 
     /**
-     * @var array
+     * @var int[]
      */
     protected $specific = [];
 
@@ -78,9 +79,9 @@ class Field
     }
 
     /**
-     * @param $val
+     * @param string $val
      */
-    public function fromCronValue($val): void
+    public function fromCronValue(string $val): void
     {
         $parts = explode(',', $val);
 
@@ -148,7 +149,7 @@ class Field
     }
 
     /**
-     * @param array $value
+     * @param int[] $value
      *
      * @return $this
      */
@@ -160,13 +161,13 @@ class Field
     }
 
     /**
-     * @param $value
+     * @param int|string $value
      *
      * @return $this
      */
     public function addSpecific($value): self
     {
-        $this->specific[] = $value;
+        $this->specific[] = $value === '*' ? $value : (int)$value;
         $this->specific   = array_unique($this->specific);
 
         return $this;

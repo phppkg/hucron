@@ -1,5 +1,6 @@
 <?php /** @noinspection PhpUndefinedMethodInspection */
 declare(strict_types=1);
+
 /**
  * This file is part of Kite.
  *
@@ -34,7 +35,7 @@ class ParserTest extends TestCase
         $this->expectException(ParseException::class);
 
         $parser = $this->getParser();
-        $token = ['token' => Parser::T_EVERY];
+        $token  = ['token' => Parser::T_EVERY];
 
         $parser->expects($token, Parser::T_ONAT);
     }
@@ -161,7 +162,7 @@ class ParserTest extends TestCase
     public function testParseMore(): void
     {
         $parser = $this->getParser();
-        $tests = [
+        $tests  = [
             ['*/5 * * * *', 'every 5 min'],
             ['0 10 * * *', 'every day 10am'],
             ['0 10 * * *', 'Every day 10 am'],
