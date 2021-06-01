@@ -97,7 +97,7 @@ class Statement
         ];
 
         // TODO ...
-        return '';
+        return 'TODO';
     }
 
     public function date(Field $dayOfWeek, Field $dayOfMonth, Field $month)

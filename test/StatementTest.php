@@ -17,6 +17,7 @@ class StatementTest extends TestCase
     {
         $st = Statement::fromCronString('20 10 * * *');
 
-        vdump($st->convert());
+        // vdump($st->convert());
+        self::assertNotEmpty($st->convert());
     }
 }
