@@ -8,7 +8,10 @@
  * @license  MIT
  */
 
+namespace HuCronTest;
+
 use HuCron\Cron;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class CronTest extends TestCase

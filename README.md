@@ -14,26 +14,45 @@
 composer install phpcom-lab/hucron
 ```
 
-## Example
+## Usage
 
 There are some examples for parse human statement.
+
+### Shortcuts statement
 
 ```php
 use HuCron\HuCron;
 
-echo HuCron::fromExpression('Every day at midnight');
+echo HuCron::fromStatement('@hourly'); // "0 * * * *"
+
+echo HuCron::fromStatement('@daliy'); // "0 0 * * *"
+
+echo HuCron::fromStatement('@weekly'); // "0 0 * * 0"
+
+echo HuCron::fromStatement('@monthly'); // "0 0 1 * *"
+
+// echo HuCron::fromStatement('@yearly');
+echo HuCron::fromStatement('@annually'); // "0 0 1 1 *"
+```
+
+### Custom statement
+
+```php
+use HuCron\HuCron;
+
+echo HuCron::fromStatement('Every day at midnight');
 // "0 0 * * *"
 
 echo HuCron::fromStatement('Every 15 minutes at midnight on the weekend');
 // "*/15 0 * * 0,6"
 
-echo HuCron::fromExpr('Every other minute in August at noon on a weekday');
+echo HuCron::fromStatement('Every other minute in August at noon on a weekday');
 // "*/2 12 * 8 1,2,3,4,5"
 
-echo HuCron::fromExpr('The 1st day in April at midnight');
+echo HuCron::fromStatement('The 1st day in April at midnight');
 // "0 0 1 4 *"
 
-echo HuCron::fromExpr('Every day on the weekday at 2:25pm');
+echo HuCron::fromStatement('Every day on the weekday at 2:25pm');
 // "25 14 * * 1,2,3,4,5"
 ```
 

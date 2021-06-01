@@ -10,6 +10,7 @@ use function is_string;
  * Class Statement
  *
  * @package HuCron
+ * @refer https://github.com/ajbdev/cronlingo/compare/invert-crontab
  */
 class Statement
 {
@@ -17,11 +18,6 @@ class Statement
      * @var Cron
      */
     protected $cron;
-
-    /**
-     * @var string
-     */
-    protected $statement;
 
     /**
      * @var string[][]
@@ -33,6 +29,26 @@ class Statement
         'dayOfWeek'  => ['day of the week', 'day of the week'],
         'dayOfMonth' => ['day of the month', 'day of the month'],
     ];
+
+    /**
+     * @param Cron $cron
+     *
+     * @return Statement
+     */
+    public static function fromCron(Cron $cron): self
+    {
+        return new self($cron);
+    }
+
+    /**
+     * @param string $cronString
+     *
+     * @return Statement
+     */
+    public static function fromCronString(string $cronString): self
+    {
+        return new self($cronString);
+    }
 
     /**
      * Class constructor.
@@ -55,40 +71,84 @@ class Statement
      */
     public function __toString(): string
     {
-        return $this->generate();
+        return $this->convert();
     }
 
     /**
-     * Generate the human statement string.
+     * @return string
+     */
+    public function toStatement(): string
+    {
+        return $this->convert();
+    }
+
+    /**
+     * Convert the cron expr to human statement.
      *
      * eg '30 12 * * *' to 'Every day at 12:30 AM'
      *
      * @return string
      */
-    public function generate(): string
+    public function convert(): string
     {
+        $timeParts = [
+            $this->field($this->cron->hour),
+            $this->field($this->cron->minute),
+        ];
+
         // TODO ...
         return '';
     }
 
-    /**
-     * @param Cron $cron
-     *
-     * @return Statement
-     */
-    public static function fromCron(Cron $cron): self
+    public function date(Field $dayOfWeek, Field $dayOfMonth, Field $month)
     {
-        return new self($cron);
+        $parts = [
+            'dayOfMonth' => $this->field($dayOfMonth),
+            'dayOfWeek'  => $this->field($dayOfWeek, FieldMap::$dayOfWeekMap),
+            'month'      => $this->field($month, FieldMap::$monthMap),
+        ];
+
+        $fragment = '';
+
+        foreach ($parts as $part => $piece) {
+
+        }
+
+
+    }
+
+    public function time(Field $hour, Field $minute)
+    {
+
     }
 
     /**
-     * @param string $cronString
+     * @param Field $field
+     * @param array $map The name string to int value map. {@see Parser::$dayOfWeekMap}
      *
-     * @return Statement
+     * @return array
      */
-    public static function fromCronString(string $cronString): self
+    public function field(Field $field, array $map = []): array
     {
-        return new self($cronString);
+        $parts = [];
+        if (count($field->getSpecific()) > 0) {
+            $parts['specific'] = [];
+
+            $map = array_flip($map);
+            foreach ($field->getSpecific() as $spec) {
+                $parts['specific'] = $map[$spec] ?? $spec;
+            }
+        }
+
+        if ($field->getRangeMin() && $field->getRangeMax()) {
+            $parts['range'] = $field->getRangeMin() . ' to ' . $field->getRangeMax();
+        }
+
+        if ($field->getRepeats()) {
+            $parts['repeats'] = $field->getRepeats();
+        }
+
+        return $parts;
     }
 
     /**

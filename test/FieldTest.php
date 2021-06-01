@@ -9,21 +9,28 @@ declare(strict_types=1);
  * @license  MIT
  */
 
+namespace HuCronTest;
+
 use HuCron\Field;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Class FieldTest
+ *
+ * @package HuCronTest
+ */
 class FieldTest extends TestCase
 {
     public function testDefault(): void
     {
-        $field = new Field();
+        $field = Field::hour();
 
         $this->assertEquals('*', (string)$field);
     }
 
     public function testRepeat(): void
     {
-        $field = new Field();
+        $field = Field::hour();
 
         $field->repeatsOn(2);
 
@@ -32,7 +39,7 @@ class FieldTest extends TestCase
 
     public function testSpecific(): void
     {
-        $field = new Field();
+        $field = Field::hour();
 
         $field->addSpecific(5)
             ->addSpecific(6);
@@ -46,7 +53,7 @@ class FieldTest extends TestCase
 
     public function testRepeatsWithSpecific(): void
     {
-        $field = new Field();
+        $field = Field::hour();
 
         $field->repeatsOn(2)
             ->addSpecific(5);
@@ -56,7 +63,7 @@ class FieldTest extends TestCase
 
     public function testRange(): void
     {
-        $field = new Field();
+        $field = Field::hour();
         $field->setRange(0, 15);
 
         $this->assertEquals('0-15', (string)$field);

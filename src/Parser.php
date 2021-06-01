@@ -56,13 +56,22 @@ class Parser
         '@hourly'   => '0 * * * *',
     ];
 
+    // 'daily|weekly|monthly|yearly'
+    // eg: will convert 'daily' to 'every day'
+    public const EVERY_EXTEND = [
+        'daily'   => 'every day',
+        'weekly'  => 'every week',
+        'monthly' => 'every month',
+        'yearly'  => 'every year',
+    ];
+
     /**
      * Regular expressions used to tokenize a string
      *
      * @var array
      */
     protected $tokenMap = [
-        'every|daily|weekly|monthly'                                                              => self::T_EVERY,
+        'every|daily|weekly|monthly|yearly'                                                       => self::T_EVERY,
         '\d{1,2}:\d{2}(?:am|pm)?'                                                                 => self::T_EXACTTIME,
         '\d{1,2}(?:am|pm|a|p)'                                                                    => self::T_EXACTTIME,
         '(?:am|pm)'                                                                               => self::T_MERIDIEM,
@@ -232,10 +241,11 @@ class Parser
             return [];
         }
 
+        // do lex parse
         $regex  = $this->compileRegex();
         $tokens = [];
 
-        $fragment  = strtok($fmtString, $delimiter);
+        $fragment = strtok($fmtString, $delimiter);
         while (false !== $fragment) {
             if (preg_match($regex, $fragment, $matches)) {
                 foreach ($matches as $offset => $val) {
@@ -256,7 +266,6 @@ class Parser
         }
 
         foreach ($tokens as $idx => &$item) {
-            // $prevIdx = $idx - 1;
             $nextIdx = $idx + 1;
 
             // will auto fix: '10 am' to '10:00 am'
@@ -284,7 +293,7 @@ class Parser
         $value = $this->current()['value'];
 
         switch ($token) {
-            case self::T_EVERY:
+            case self::T_EVERY: // 'every|daily|weekly|monthly'
                 $this->expects($this->next(), self::EVERY_NEXT_TYPES);
                 break;
             case self::T_INTERVAL:

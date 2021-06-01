@@ -14,17 +14,26 @@ use function implode;
 use function is_null;
 use function preg_match;
 use function strpos;
-use function vdump;
 
 /**
- * Represents a field within a CRON expression
- *
- * Class Field
+ * Class Field - Represents a field within a CRON expression
  *
  * @package HuCron
  */
 class Field
 {
+    // '5 10 * * *'
+    public const MINUTE       = 'minute';
+    public const HOUR         = 'hour';
+    public const DAY_OF_MONTH = 'dayOfMonth';
+    public const MONTH        = 'month';
+    public const DAY_OF_WEEK  = 'dayOfWeek';
+
+    /**
+     * @var string
+     */
+    private $name;
+
     /**
      * @var int
      */
@@ -36,21 +45,75 @@ class Field
     protected $specific = [];
 
     /**
-     * @var int
+     * @var int|null
      */
     protected $rangeMin;
 
     /**
-     * @var int
+     * @var int|null
      */
     protected $rangeMax;
+
+    /**
+     * @return static
+     */
+    public static function minute(): self
+    {
+        return new self(self::MINUTE);
+    }
+
+    /**
+     * @return static
+     */
+    public static function hour(): self
+    {
+        return new self(self::HOUR);
+    }
+
+    /**
+     * @return static
+     */
+    public static function month(): self
+    {
+        return new self(self::MONTH);
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return static
+     */
+    public static function new(string $name): self
+    {
+        return new self($name);
+    }
+
+    /**
+     * Class constructor.
+     *
+     * @param string $name
+     */
+    public function __construct(string $name)
+    {
+        $this->name = $name;
+    }
 
     /**
      * Build CRON expression part based on set values
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+
+    /**
+     * Build CRON expression part based on set values
+     *
+     * @return string
+     */
+    public function toString(): string
     {
         $value = '';
         if ($this->repeats) {
@@ -71,11 +134,7 @@ class Field
             $value = $this->rangeMin . '-' . $this->rangeMax;
         }
 
-        if ($value === '') {
-            $value = '*';
-        }
-
-        return $value;
+        return $value === '' ? '*' : $value;
     }
 
     /**
@@ -188,7 +247,7 @@ class Field
     /**
      * @return int
      */
-    public function getRepeats(): int
+    public function getRepeats(): ?int
     {
         return $this->repeats;
     }
@@ -204,7 +263,7 @@ class Field
     /**
      * @return int
      */
-    public function getRangeMin(): int
+    public function getRangeMin(): ?int
     {
         return $this->rangeMin;
     }
@@ -212,8 +271,16 @@ class Field
     /**
      * @return int
      */
-    public function getRangeMax(): int
+    public function getRangeMax(): ?int
     {
         return $this->rangeMax;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 }

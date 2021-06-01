@@ -9,9 +9,15 @@ declare(strict_types=1);
  * @license  MIT
  */
 
+namespace HuCronTest;
+
 use HuCron\ParseException;
 use HuCron\Parser;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
+use function vdump;
 
 /**
  * Class ParserTest
@@ -30,6 +36,54 @@ class ParserTest extends TestCase
         return $this->parser;
     }
 
+    /**
+     * get method for test protected and private method
+     *
+     * usage:
+     *
+     * $rftObj = $this->method($className,$protectedOrPrivateMethod)
+     *
+     * $obj = new $className();
+     * $res = $rftObj->invokeArgs($obj,$invokeArgs);
+     *
+     * @param $class
+     * @param $method
+     *
+     * @return ReflectionMethod
+     * @throws ReflectionException
+     */
+    protected static function getMethod($class, $method): ReflectionMethod
+    {
+        $class  = new ReflectionClass($class);
+        $method = $class->getMethod($method);
+        $method->setAccessible(true);
+
+        return $method;
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function testLex(): void
+    {
+        /** @see Parser::lex() */
+        $rftObj = self::getMethod(Parser::class, 'lex');
+        $parser = $this->getParser();
+
+        $ret = $rftObj->invokeArgs($parser, ['every day 0 am']);
+        $this->assertCount(4, $ret);
+        $this->assertNotEmpty($ret);
+
+        $ret = $rftObj->invokeArgs($parser, ['daily 0 am']);
+        $this->assertCount(3, $ret);
+        $this->assertNotEmpty($ret);
+
+        $ret = $rftObj->invokeArgs($parser, ['weekly sunday 11:00 am']);
+        $this->assertCount(4, $ret);
+        $this->assertNotEmpty($ret);
+        // vdump($ret);
+    }
+
     public function testParseException(): void
     {
         $this->expectException(ParseException::class);
@@ -40,12 +94,49 @@ class ParserTest extends TestCase
         $parser->expects($token, Parser::T_ONAT);
     }
 
-    public function testEvery(): void
+    public function testParse_Shortcut(): void
     {
         $parser = $this->getParser();
 
-        $statement = 'Every day at midnight';
-        $this->assertEquals('0 0 * * *', $parser->parse($statement));
+        foreach (Parser::SHORTCUTS as $str => $want) {
+            $this->assertEquals($want, $parser->parse($str));
+        }
+    }
+
+    public function testParse_Every(): void
+    {
+        $parser = $this->getParser();
+        $tests = [
+            // [case, want]
+            ['every day 1am', '0 1 * * *'],
+            ['every day 1 am', '0 1 * * *'],
+            ['every day 1:00 am', '0 1 * * *'],
+            // every day 0:00 am
+            ['every day 0am', '0 0 * * *'],
+            ['every day 0 am', '0 0 * * *'],
+            ['daily at 0 am', '0 0 * * *'],
+            ['every day 0:00 am', '0 0 * * *'],
+            ['Every day at midnight', '0 0 * * *'],
+            // Noon every day
+            ['every day at noon', '0 12 * * *'],
+            ['every day at midday', '0 12 * * *'],
+            ['every day 12am', '0 12 * * *'],
+            // every 5 minutes
+            ['every 5 min', '*/5 * * * *'],
+            ['every 5 mins', '*/5 * * * *'],
+            ['every 5 minute', '*/5 * * * *'],
+            ['every 5 minutes', '*/5 * * * *'],
+            // Every Sunday at 1:00 am
+            ['weekly sunday at 1 am', '0 1 * * 0'],
+            ['weekly sunday at 1:00 am', '0 1 * * 0'],
+            ['Every Sunday at 1:00 am', '0 1 * * 0'],
+            ['weekly sunday at 1:00 am', '0 1 * * 0'],
+            // other
+            ['every 2 hour', '0 */2 * * *'],
+        ];
+        foreach ($tests as [$str, $want]) {
+            $this->assertEquals($want, $parser->parse($str));
+        }
     }
 
     public function testExactTime(): void
@@ -67,11 +158,12 @@ class ParserTest extends TestCase
         $this->assertEquals('0 10 * * *', $parser->parse('Every day at 10:00 AM'));
     }
 
-    public function testInterval(): void
+    public function testParse_Interval(): void
     {
         $parser = $this->getParser();
 
         $this->assertEquals('*/2 * * * *', $parser->parse('Every other minute'));
+        $this->assertEquals('*/2 * * * *', $parser->parse('Every 2 minute'));
 
         $this->assertEquals('0 */3 * * *', $parser->parse('Every 3 hours'));
     }

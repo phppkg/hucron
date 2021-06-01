@@ -13,7 +13,9 @@ use InvalidArgumentException;
 use function count;
 use function implode;
 use function preg_split;
+use function strtolower;
 use function trim;
+use const PREG_SPLIT_NO_EMPTY;
 
 /**
  * Represents a CRON expression
@@ -30,6 +32,8 @@ class Cron
     private $rawExpr = '';
 
     /**
+     * eg '5 10 * * *'
+     *
      * @var string
      */
     private $cronExpr;
@@ -81,16 +85,24 @@ class Cron
      */
     public function __construct(string $string = '')
     {
-        $this->dayOfWeek  = new Field();
-        $this->dayOfMonth = new Field();
+        $this->dayOfWeek  = Field::new(Field::DAY_OF_WEEK);
+        $this->dayOfMonth = Field::new(Field::DAY_OF_MONTH);
 
-        $this->month  = new Field();
-        $this->hour   = new Field();
-        $this->minute = new Field();
+        $this->month  = Field::month();
+        $this->hour   = Field::hour();
+        $this->minute = Field::minute();
 
         if ($string) {
             $this->fromString($string);
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function toStatement(): string
+    {
+        return Statement::fromCron($this)->toStatement();
     }
 
     /**
@@ -112,11 +124,12 @@ class Cron
     /**
      * Create CRON object from a crontab string
      *
-     * @param string $string
+     * @param string $string eg: '5 10 * * *'
      */
     public function fromString(string $string): void
     {
-        $parts = preg_split('/\s+/', trim($string));
+        $fmtStr = strtolower(trim($string));
+        $parts  = preg_split('/\s+/', $fmtStr, -1, PREG_SPLIT_NO_EMPTY);
         if (count($parts) < 5) {
             throw new InvalidArgumentException("invalid cron expr string: $string");
         }

@@ -16,18 +16,8 @@ namespace HuCron;
  *
  * @package HuCron
  */
-class HuCron
+final class HuCron
 {
-    /**
-     * @param $string
-     *
-     * @return string
-     */
-    public static function fromExpr($string): string
-    {
-        return self::getParser()->parse($string);
-    }
-
     /**
      * @param $string
      *
@@ -39,13 +29,23 @@ class HuCron
     }
 
     /**
-     * @param $string
+     * @param string $string
      *
      * @return string
      */
-    public static function fromExpression($string): string
+    public static function fromExpression(string $string): string
     {
-        return self::getParser()->parse($string);
+        return Statement::fromCronString($string)->toStatement();
+    }
+
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
+    public static function fromExpr(string $string): string
+    {
+        return Statement::fromCronString($string)->toStatement();
     }
 
     /**
