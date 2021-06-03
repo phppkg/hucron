@@ -135,7 +135,20 @@ class ParserTest extends TestCase
             ['every 2 hour', '0 */2 * * *'],
         ];
         foreach ($tests as [$str, $want]) {
-            $this->assertEquals($want, $parser->parse($str));
+            $this->assertEquals($want, $parser->parse($str), "desc: '$str'");
+        }
+    }
+
+    public function testParse_AutoSort(): void
+    {
+        $tests = [
+            ['Every day at midnight', '0 0 * * *'],
+            // ['Midnight every day', '0 0 * * *'],
+        ];
+
+        $parser = $this->getParser();
+        foreach ($tests as [$str, $want]) {
+            $this->assertEquals($want, $parser->parse($str), "desc: '$str'");
         }
     }
 

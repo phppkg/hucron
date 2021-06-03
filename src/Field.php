@@ -22,6 +22,7 @@ use function strpos;
  */
 class Field
 {
+    public const SECOND = 'second';
     // '5 10 * * *'
     public const MINUTE       = 'minute';
     public const HOUR         = 'hour';

@@ -4,7 +4,6 @@ namespace HuCronTest;
 
 use HuCron\Statement;
 use PHPUnit\Framework\TestCase;
-use function vdump;
 
 /**
  * Class StatementTest

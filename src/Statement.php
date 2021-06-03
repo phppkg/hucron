@@ -1,4 +1,11 @@
 <?php declare(strict_types=1);
+/**
+ * This file is part of Kite.
+ *
+ * @author   https://github.com/inhere
+ * @link     https://github.com/phpcom-lab/hucron
+ * @license  MIT
+ */
 
 namespace HuCron;
 
@@ -124,7 +131,7 @@ class Statement
 
     /**
      * @param Field $field
-     * @param array $map The name string to int value map. {@see Parser::$dayOfWeekMap}
+     * @param array $map The name string to int value map. {@see Keywords::DAY_OF_WEEK}
      *
      * @return array
      */

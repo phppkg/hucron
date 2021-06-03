@@ -18,6 +18,20 @@ namespace HuCron;
  */
 final class HuCron
 {
+    //----------------------------------------------------------
+    // convert an statement/sentence/description to cron expression.
+    //----------------------------------------------------------
+
+    /**
+     * @param $string
+     *
+     * @return string
+     */
+    public static function fromDescription($string): string
+    {
+        return self::getParser()->parse($string);
+    }
+
     /**
      * @param $string
      *
@@ -27,6 +41,20 @@ final class HuCron
     {
         return self::getParser()->parse($string);
     }
+
+    /**
+     * @param $string
+     *
+     * @return string
+     */
+    public static function fromSentence($string): string
+    {
+        return Parser::new()->parse($string);
+    }
+
+    //----------------------------------------------------------
+    // TODO convert an cron expression to statement/sentence/description.
+    //----------------------------------------------------------
 
     /**
      * @param string $string
