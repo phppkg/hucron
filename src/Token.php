@@ -68,6 +68,6 @@ class Token
         '@weekly'   => '0 0 * * 0',
         '@daily'    => '0 0 * * *',
         '@hourly'   => '0 * * * *',
+        '@minutely' => '* * * * *',
     ];
-
 }
