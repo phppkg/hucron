@@ -98,7 +98,8 @@ It typically automates system maintenance or administration—though its general
 
 ## Related
 
-- `dragonmantank/cron-expression` Calculate the next or previous run date and determine
+- https://github.com/dragonmantank/cron-expression Calculate the next or previous run date and determine
+- https://github.com/lorisleiva/cron-translator Makes CRON expressions human-readable
 
 ## LICENSE
 
