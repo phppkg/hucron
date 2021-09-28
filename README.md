@@ -2,7 +2,8 @@
 
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/phppkg/hucron)](https://github.com/phppkg/hucron)
 [![Github Actions Status](https://github.com/phppkg/hucron/workflows/Unit-tests/badge.svg)](https://github.com/phppkg/hucron/actions)
-[![Php Version](https://img.shields.io/badge/php-%3E7.2.0-brightgreen.svg?maxAge=2592000)](https://packagist.org/packages/toolkit/sys-utils)
+[![Php Version](https://img.shields.io/badge/php-%3E7.2.0-brightgreen.svg?maxAge=2592000)](https://packagist.org/packages/phppkg/hucron)
+[![License](https://img.shields.io/packagist/l/phppkg/hucron.svg?style=flat-square)](LICENSE)
 
 `HuCron` turns human readable strings about time and turns them into valid crontabs. 
 
