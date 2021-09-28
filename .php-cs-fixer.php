@@ -4,7 +4,7 @@ $header = <<<'EOF'
 This file is part of Kite.
 
 @author   https://github.com/inhere
-@link     https://github.com/phpcom-lab/hucron
+@link     https://github.com/phppkg/hucron
 @license  MIT
 EOF;
 

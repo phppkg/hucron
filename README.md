@@ -1,17 +1,17 @@
 # HuCron
 
-[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/phpcom-lab/hucron)](https://github.com/phpcom-lab/hucron)
-[![Github Actions Status](https://github.com/phpcom-lab/hucron/workflows/Unit-tests/badge.svg)](https://github.com/phpcom-lab/hucron/actions)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/phppkg/hucron)](https://github.com/phppkg/hucron)
+[![Github Actions Status](https://github.com/phppkg/hucron/workflows/Unit-tests/badge.svg)](https://github.com/phppkg/hucron/actions)
 [![Php Version](https://img.shields.io/badge/php-%3E7.2.0-brightgreen.svg?maxAge=2592000)](https://packagist.org/packages/toolkit/sys-utils)
 
 `HuCron` turns human readable strings about time and turns them into valid crontabs. 
 
-> `phpcom-lab/hucron` is froked from the https://github.com/ajbdev/cronlingo
+> `phppkg/hucron` is froked from the https://github.com/ajbdev/cronlingo
 
 ## Install
 
 ```bash
-composer install phpcom-lab/hucron
+composer install phppkg/hucron
 ```
 
 ## Usage
